@@ -15,13 +15,21 @@
 # limitations under the License.
 #
 
+set -euxo pipefail
+
+# Set the secret name
+CONTROLLER_SECRET_NAME="controller-tls"
+SEGMENT_STORE_SECRET_NAME="segmentstore-tls"
+
+echo "Secret creation has started for $CONTROLLER_SECRET_NAME and $SEGMENT_STORE_SECRET_NAME"
+
 # Set the namespace, we want to create the secret
 NAMESPACE="default"
 #tlsEnabled=true
 #securityEnabled=true
 
 # Define the secrets we want to delete
-secrets_to_delete=("password-auth" "controller-tls" "segmentstore-tls")
+secrets_to_delete=("controller-tls" "segmentstore-tls")
 
 # Delete secret if it exists
 if [ "$tlsEnabled" == "true" ] && [ "$securityEnabled" == "true" ]; then
@@ -31,18 +39,13 @@ if [ "$tlsEnabled" == "true" ] && [ "$securityEnabled" == "true" ]; then
     for secret in "${secrets_to_delete[@]}"; do
         kubectl get secret $secret &> /dev/null
         if [ $? -eq 0 ]; then
-            echo "Deleting secret $secret"
+            echo "Deleting existing secret $secret"
             kubectl delete secret $secret
         else
             echo "Secret $secret does not exist, skipping deletion"
         fi
     done
 fi
-
-# Set the secret name
-CONTROLLER_SECRET_NAME="controller-tls"
-SEGMENT_STORE_SECRET_NAME="segmentstore-tls"
-PASSWORD_AUTH_SECRET_NAME="password-auth"
 
 cd ../
 CERTIFICATE_PATH=$(pwd)/src/test/resources
@@ -61,26 +64,15 @@ SEGMENT_STORE_JKS_FILE="$CERTIFICATE_PATH/segmentstore01.jks"
 
 TLS_CRT="$CERTIFICATE_PATH/tls.crt"
 PASS_SECRET="$CERTIFICATE_PATH/pass-secret-tls"
-PASS_SECRET_TLS_AUTH="$CERTIFICATE_PATH/pass-secret-tls-auth.txt"
-
-# Create the password-auth secret
-kubectl create secret generic $PASSWORD_AUTH_SECRET_NAME --from-file=$PASS_SECRET_TLS_AUTH --namespace=$NAMESPACE
-
-# Checking if the password-auth secret creation was successful
-if [ $? -eq 0 ]; then
-  echo "Kubernetes secret '$PASSWORD_AUTH_SECRET_NAME' created successfully in namespace '$NAMESPACE'."
-else
-  echo "Error creating Kubernetes secret '$PASSWORD_AUTH_SECRET_NAME' in namespace '$NAMESPACE'."
-fi
 
 # Create the controller-tls secret
 kubectl create secret generic $CONTROLLER_SECRET_NAME \
   --namespace=$NAMESPACE \
   --from-file=$CONTROLLER_PEM_FILE \
-  --from-file=$CONTROLLER_TLS_CRT \
+  --from-file=$TLS_CRT \
   --from-file=$CONTROLLER_KEY_PEM \
   --from-file=$CONTROLLER_JKS_FILE \
-  --from-file=$CONTROLLER_PASS_SECRET
+  --from-file=$PASS_SECRET
 
 # Checking if the controller-tls secret creation was successful
 if [ $? -eq 0 ]; then
@@ -104,3 +96,5 @@ if [ $? -eq 0 ]; then
 else
   echo "Error creating Kubernetes secret '$SEGMENT_STORE_SECRET_NAME' in namespace '$NAMESPACE'."
 fi
+
+echo "Secret creation has finished successfully for $CONTROLLER_SECRET_NAME and $SEGMENT_STORE_SECRET_NAME"
