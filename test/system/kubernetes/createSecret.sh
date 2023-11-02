@@ -44,7 +44,6 @@ CONTROLLER_SECRET_NAME="controller-tls"
 SEGMENT_STORE_SECRET_NAME="segmentstore-tls"
 PASSWORD_AUTH_SECRET_NAME="password-auth"
 
-PATH=$(pwd)
 cd ../
 CERTIFICATE_PATH=$(pwd)/src/test/resources
 echo "Certificates path : $CERTIFICATE_PATH"
