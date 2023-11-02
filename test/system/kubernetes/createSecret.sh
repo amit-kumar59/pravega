@@ -15,8 +15,6 @@
 # limitations under the License.
 #
 
-set -euxo pipefail
-
 # Set the secret name
 CONTROLLER_SECRET_NAME="controller-tls"
 SEGMENT_STORE_SECRET_NAME="segmentstore-tls"
@@ -30,6 +28,9 @@ NAMESPACE="default"
 
 # Define the secrets we want to delete
 secrets_to_delete=("controller-tls" "segmentstore-tls")
+
+echo "Tls enabled status : $tlsEnabled"
+echo "Security auth enable status : $securityEnabled"
 
 # Delete secret if it exists
 if [ "$tlsEnabled" == "true" ] && [ "$securityEnabled" == "true" ]; then
@@ -47,7 +48,6 @@ if [ "$tlsEnabled" == "true" ] && [ "$securityEnabled" == "true" ]; then
     done
 fi
 
-cd ../
 CERTIFICATE_PATH=$(pwd)/src/test/resources
 echo "Certificates path : $CERTIFICATE_PATH"
 
