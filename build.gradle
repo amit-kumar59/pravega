@@ -1159,6 +1159,7 @@ project('test:system') {
         environment "skipServiceInstallation", System.getProperty("skipServiceInstallation", "false")
         environment "testPodImage", System.getProperty("testPodImage", "openjdk:8u181-jre-alpine")
 
+        commandLine './kubernetes/createSecret.sh'
         commandLine './kubernetes/setupTestPod.sh'
     }
 
