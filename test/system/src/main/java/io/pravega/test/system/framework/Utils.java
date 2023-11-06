@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.auth.AUTH;
 
 import java.net.URI;
 
@@ -147,6 +148,9 @@ public class Utils {
 
     private static ImmutableMap<String, String> readPravegaProperties() {
         String resourceName = PROPERTIES_FILE;
+
+        log.info("****Utils@readPravegaProperties ::AUTH_ENABLED :{} and TLS_AND_AUTH_ENABLED::{} ", AUTH_ENABLED,TLS_AND_AUTH_ENABLED);
+
         if (AUTH_ENABLED) {
             resourceName = PROPERTIES_FILE_WITH_AUTH;
         }
@@ -156,13 +160,22 @@ public class Utils {
         Properties props = new Properties();
         if (System.getProperty(CONFIGS) != null) {
             try {
+                log.info(" *********Utils@readPravegaProperties*** CONFIGS::{}",System.getProperty(CONFIGS));
                 props.load(new StringReader(System.getProperty(CONFIGS)));
+
+                props.forEach((key, value) ->{
+                    log.info("***111*** Utils@readPravegaProperties : key::{} ***values ::{} ****",key, value);
+                });
             } catch (IOException e) {
                 log.error("Error reading custom config file.", e);
             }
         }
         try {
+            log.info("*******Utils@readPravegaProperties********resourceName ::{}",resourceName);
             props.load(Utils.class.getClassLoader().getResourceAsStream(resourceName));
+            props.forEach((key, value) ->{
+                log.info("****22** Utils@readPravegaProperties : key::{} ***values ::{} ****",key, value);
+            });
         } catch (IOException e) {
             log.error("Error reading properties file.", e);
         }
@@ -173,7 +186,7 @@ public class Utils {
 
     public static ClientConfig buildClientConfig(URI controllerUri) {
         if (TLS_AND_AUTH_ENABLED) {
-            log.debug("Generating config with tls and auth enabled.");
+            log.info("Generating config with tls and auth enabled.");
             return ClientConfig.builder()
                                // TLS-related client-side configuration
                                .trustStore(DEFAULT_TRUSTSTORE_PATH)
@@ -184,7 +197,7 @@ public class Utils {
                                .connectTimeoutMilliSec(120000)
                                .build();
         } else if (AUTH_ENABLED) {
-            log.debug("Generating config with auth enabled.");
+            log.info("Generating config with auth enabled.");
             return ClientConfig.builder()
                                // auth
                                .credentials(new DefaultCredentials("1111_aaaa", "admin"))
@@ -192,7 +205,7 @@ public class Utils {
                                .connectTimeoutMilliSec(120000)
                                .build();
         } else {
-            log.debug("Generating config with tls and auth disabled.");
+            log.info("Generating config with tls and auth disabled.");
             return ClientConfig.builder().controllerURI(controllerUri).connectTimeoutMilliSec(120000).build();
         }
     }
