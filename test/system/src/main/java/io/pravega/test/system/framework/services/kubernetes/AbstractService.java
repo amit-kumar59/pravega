@@ -66,7 +66,8 @@ public abstract class AbstractService implements Service {
     static final String CUSTOM_RESOURCE_KIND_PRAVEGA = "PravegaCluster";
     static final String PRAVEGA_CONTROLLER_LABEL = System.getProperty("controllerLabel", "pravega-controller");
     static final String PRAVEGA_SEGMENTSTORE_LABEL = System.getProperty("segmentstoreLabel", "pravega-segmentstore");
-    static final String SECRET_NAME_USED_FOR_TLS = System.getProperty("tlsSecretName", "selfsigned-cert-tls");
+    static final String SECRET_NAME_USED_FOR_CONTROLLER = "controller-tls";
+    static final String SECRET_NAME_USED_FOR_SEGMENT_STORE = "segmentstore-tls";
     static final String SECRET_NAME_USED_FOR_AUTH = "password-auth";
     static final String BOOKKEEPER_LABEL = System.getProperty("bookkeeperLabel", "bookie");
     static final String PRAVEGA_ID = System.getProperty("pravegaID", "pravega");
@@ -107,6 +108,11 @@ public abstract class AbstractService implements Service {
             log.info("Skipping PravegaCluster installation.");
             return CompletableFuture.completedFuture(null);
         }
+
+        props.forEach((k, value) ->{
+            log.info("****AbstractService@deployPravegaOnlyCluster ****33****: key::{} ***values ::{}",k, value);
+        });
+
         return registerTLSSecret()
                 .thenCompose(v -> k8sClient.createSecret(NAMESPACE, authSecret()))
                 .thenCompose(v -> k8sClient.createAndUpdateCustomObject(CUSTOM_RESOURCE_GROUP_PRAVEGA, CUSTOM_RESOURCE_VERSION_PRAVEGA,
@@ -140,9 +146,13 @@ public abstract class AbstractService implements Service {
                 .build();
 
         final Map<String, Object> staticTlsSpec = ImmutableMap.<String, Object>builder()
-                .put("controllerSecret", SECRET_NAME_USED_FOR_TLS)
-                .put("segmentStoreSecret", SECRET_NAME_USED_FOR_TLS)
+                .put("controllerSecret", SECRET_NAME_USED_FOR_CONTROLLER)
+                .put("segmentStoreSecret", SECRET_NAME_USED_FOR_SEGMENT_STORE)
                 .build();
+
+        staticTlsSpec.forEach((k, value) ->{
+            log.info("****AbstractService@buildPravegaClusterSpecWithBookieUri *****11****: key::{} ***values ::{}",k, value);
+        });
 
         final Map<String, Object> tlsSpec = ImmutableMap.<String, Object>builder()
                 .put("static", staticTlsSpec)
@@ -184,9 +194,18 @@ public abstract class AbstractService implements Service {
                 .put("pravega", pravegaSpec);
         builder.put("version", PRAVEGA_VERSION);
 
+        log.info("******AbstractService@buildPravegaClusterSpecWithBookieUri ::{}****",Utils.TLS_AND_AUTH_ENABLED);
         if (Utils.TLS_AND_AUTH_ENABLED) {
+            tlsSpec.forEach((k, value) ->{
+                log.info("****AbstractService@buildPravegaClusterSpecWithBookieUri inside if: key::{} ***values ::{}",k, value);
+            });
             builder.put("tls", tlsSpec);
         }
+
+        tlsSpec.forEach((k, value) ->{
+            log.info("****AbstractService@buildPravegaClusterSpecWithBookieUri outside if: key::{} ***values ::{}",k, value);
+        });
+
         if (Utils.AUTH_ENABLED) {
             builder.put("authentication", authGenericSpec);
         }
@@ -318,19 +337,20 @@ public abstract class AbstractService implements Service {
     }
 
     private CompletableFuture<V1Secret> registerTLSSecret() {
-        if (!Utils.TLS_AND_AUTH_ENABLED) {
+        log.info("*********AbstractService@registerTLSSecretTLS_AND_AUTH_ENABLED::{}*******************",Utils.TLS_AND_AUTH_ENABLED);
+       /* if (!Utils.TLS_AND_AUTH_ENABLED) {
             return CompletableFuture.completedFuture(null);
         }
         try {
             V1Secret secret = getTLSSecret();
-            V1Secret existingSecret  = Futures.getThrowingException(k8sClient.getSecret(SECRET_NAME_USED_FOR_TLS, NAMESPACE));
+            V1Secret existingSecret  = Futures.getThrowingException(k8sClient.getSecret(SECRET_NAME_USED_FOR_CONTROLLER, NAMESPACE));
             if (existingSecret != null) {
-                Futures.getThrowingException(k8sClient.deleteSecret(SECRET_NAME_USED_FOR_TLS, NAMESPACE));
+                Futures.getThrowingException(k8sClient.deleteSecret(SECRET_NAME_USED_FOR_CONTROLLER, NAMESPACE));
             }
             return k8sClient.createSecret(NAMESPACE, secret);
         } catch (Exception e) {
             log.error("Could not register secret: ", e);
-        }
+        }*/
         return CompletableFuture.completedFuture(null);
     }
 

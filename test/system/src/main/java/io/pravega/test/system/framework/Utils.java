@@ -35,6 +35,7 @@ import io.pravega.test.system.framework.services.marathon.ZookeeperService;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Map;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.AUTH;
@@ -74,6 +75,11 @@ public class Utils {
      * @return the configuration value.
      */
     public static String getConfig(final String key, final String defaultValue) {
+        Map<String, String> config = System.getenv();
+        config.forEach((k, value) ->{
+            log.info("****22** Utils@config : key::{} ***values ::{} ****required key ::{}",k, value,key);
+        });
+        log.info("*************************************************************************");
         return System.getenv().getOrDefault(key, System.getProperty(key, defaultValue));
     }
 
@@ -153,14 +159,16 @@ public class Utils {
 
         if (AUTH_ENABLED) {
             resourceName = PROPERTIES_FILE_WITH_AUTH;
+            log.info(" *********Utils@readPravegaProperties*** AUTH_ENABLED::{} and resource name ::{}",AUTH_ENABLED,resourceName);
         }
         if (TLS_AND_AUTH_ENABLED)  {
             resourceName = PROPERTIES_FILE_WITH_TLS;
+            log.info(" *********Utils@readPravegaProperties*** TLS_AND_AUTH_ENABLED::{} and resource name ::{}",TLS_AND_AUTH_ENABLED,resourceName);
         }
         Properties props = new Properties();
+        log.info(" *********Utils@readPravegaProperties*** CONFIGS::{}",System.getProperty(CONFIGS));
         if (System.getProperty(CONFIGS) != null) {
             try {
-                log.info(" *********Utils@readPravegaProperties*** CONFIGS::{}",System.getProperty(CONFIGS));
                 props.load(new StringReader(System.getProperty(CONFIGS)));
 
                 props.forEach((key, value) ->{
@@ -239,11 +247,13 @@ public class Utils {
 
     private static boolean isAuthEnabled() {
         String securityEnabled = Utils.getConfig("securityEnabled", "false");
+        log.info("****Utils@securityEnabled:::{}**",securityEnabled);
         return Boolean.valueOf(securityEnabled);
     }
 
     private static boolean isTLSEnabled() {
         String tlsEnabled = Utils.getConfig("tlsEnabled", "false");
+        log.info("****Utils@isTLSEnabled:::{}**",tlsEnabled);
         return Boolean.valueOf(tlsEnabled);
     }
 
