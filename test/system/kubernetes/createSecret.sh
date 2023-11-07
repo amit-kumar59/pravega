@@ -96,5 +96,4 @@ if [ $? -eq 0 ]; then
 else
   echo "Error creating Kubernetes secret '$SEGMENT_STORE_SECRET_NAME' in namespace '$NAMESPACE'."
 fi
-
 echo "Secret creation has finished successfully for $CONTROLLER_SECRET_NAME and $SEGMENT_STORE_SECRET_NAME"
