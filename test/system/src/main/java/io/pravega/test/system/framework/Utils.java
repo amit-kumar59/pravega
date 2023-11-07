@@ -252,9 +252,9 @@ public class Utils {
     }
 
     private static boolean isTLSEnabled() {
-        //String tlsEnabled = Utils.getConfig("tlsEnabled", "false");
+        String tlsEnabled = Utils.getConfig("tlsEnabled", "false");
         String tlsStatus = System.getProperty("tlsEnabled","false");
-        log.info("****Utils@isTLSEnabled::********* tlsStatus ::{} ***boolean status ::{}", tlsStatus,Boolean.valueOf(tlsStatus));
+        log.info("****Utils@isTLSEnabled::********* tlsStatus ::{} ***boolean status ::{} **tlsEnabled ::{}", tlsStatus,Boolean.valueOf(tlsStatus),tlsEnabled);
        // return Boolean.valueOf(tlsStatus);
         return true;
 
