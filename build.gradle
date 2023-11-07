@@ -1095,14 +1095,7 @@ project('test:system') {
 
     //This is  used to invoke systemTests
     task startSystemTests(type: Test) {
-        //tasks.withType(Exec) { environment "tlsEnabled", System.getProperty("tlsEnabled", "false") }
-
-        def securityEnabled37 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******start  startSystemTests****build.gradle@startSystemTests@securityEnabled37 - " +securityEnabled37+ ", *********************"
-
-        def tlsEnabled3 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****start startSystemTests***build.gradle@startSystemTests@tlsEnabled3 - " +tlsEnabled3+ ", *********************"
-
+        tasks.withType(Exec) { environment "tlsEnabled", System.getProperty("tlsEnabled", "false") }
         ext.dockerRegistryUrl = project.hasProperty("dockerRegistryUrl") ? project.dockerRegistryUrl : ""
         ext.repoUrl = project.hasProperty("repoUrl") ? project.repoUrl : ""
 
@@ -1136,42 +1129,15 @@ project('test:system') {
         systemProperty "dockerImageRegistry", "${dockerRegistryUrl}"
         systemProperty "testVersion", pravegaVersion
         systemProperty "tlsEnabled", System.getProperty("tlsEnabled", "false")
-
-        def securityEnabled38 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******end  startSystemTests****build.gradle@startSystemTests@securityEnabled37 - " +securityEnabled38+ ", *********************"
-
-        def tlsEnabled33 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****end startSystemTests***build.gradle@startSystemTests@tlsEnabled33 - " +tlsEnabled33+ ", *********************"
-
         systemProperty "testArtifactUrl", "${repoUrl}/io/pravega/pravega-test-system/" +
                 pravegaVersion+"/pravega-test-system-"+ pravegaVersion + ".jar"
 
         onlyIf { dockerRegistryUrl && repoUrl }
-
-        def securityEnabled39 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******at last  startSystemTests****build.gradle@startSystemTests@securityEnabled39 - " +securityEnabled39+ ", *********************"
-
-        def tlsEnabled34 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****at last startSystemTests***build.gradle@startSystemTests@tlsEnabled34 - " +tlsEnabled34+ ", *********************"
     }
 
     task copyTestsToK8sCluster(type: Exec) {
-
-        def securityEnabled34 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "*******before jar****build.gradle@copyTestsToK8sCluster@securityEnabled34 - " +securityEnabled34+ ", *********************"
-
-        def tlsEnabled = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "******before jar*****build.gradle@copyTestsToK8sCluster@tlsEnabled - " +tlsEnabled+ ", *********************"
-
         description 'Used to copy test artifacts to the Kubernetes Cluster.'
         dependsOn 'jar'
-
-        def securityEnabled35 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "*******after jar****build.gradle@copyTestsToK8sCluster@securityEnabled35 - " +securityEnabled35+ ", *********************"
-
-        def tlsEnabled1 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "******after jar*****build.gradle@copyTestsToK8sCluster@tlsEnabled1 - " +tlsEnabled1+ ", *********************"
-
 
         environment "dockerRegistryUrl", System.getProperty("dockerRegistryUrl")
         environment "imagePrefix", System.getProperty("imagePrefix", "pravega")
@@ -1189,42 +1155,14 @@ project('test:system') {
         environment "publishedChartName", System.getProperty("publishedChartName", "pravega")
         environment "helmRepository", System.getProperty("helmRepository", "https://charts.pravega.io")
         environment "helmHookImageName", System.getProperty("helmHookImageName", "lachlanevenson/k8s-kubectl")
-
-
-
         environment "tlsEnabled", System.getProperty("tlsEnabled", "false")
-        environment "securityEnabled", System.getProperty("securityEnabled", "false")
-
         environment "skipServiceInstallation", System.getProperty("skipServiceInstallation", "false")
         environment "testPodImage", System.getProperty("testPodImage", "openjdk:8u181-jre-alpine")
 
-
-
-        def securityEnabled36 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******BEFORE SETUPTESTPOD****build.gradle@copyTestsToK8sCluster@securityEnabled36 - " +securityEnabled36+ ", *********************"
-
-        def tlsEnabled2 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****before setuptestpod***build.gradle@copyTestsToK8sCluster@tlsEnabled2 - " +tlsEnabled2+ ", *********************"
-
-
         commandLine './kubernetes/setupTestPod.sh'
-
-        def securityEnabled37 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******after SETUPTESTPOD****build.gradle@copyTestsToK8sCluster@securityEnabled37 - " +securityEnabled37+ ", *********************"
-
-        def tlsEnabled3 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****after setuptestpod***build.gradle@copyTestsToK8sCluster@tlsEnabled3 - " +tlsEnabled3+ ", *********************"
-
     }
 
     task runFluentBitInstall(type: Exec) {
-
-        def securityEnabled36 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******BEFORE runFluentBitInstall****build.gradle@runFluentBitInstall@securityEnabled36 - " +securityEnabled36+ ", *********************"
-
-        def tlsEnabled2 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****before runFluentBitInstall***build.gradle@runFluentBitInstall@tlsEnabled2 - " +tlsEnabled2+ ", *********************"
-
         if (System.getProperty("skipFluentInstall", "false") == "false") {
             environment 'FLUENT_BIT_STORAGE_CLASS', System.getProperty("logStorageClass", "")
             environment 'FLUENT_BIT_HOST_LOGS_PATH', System.getProperty("k8HostLogPath", "")
@@ -1233,12 +1171,6 @@ project('test:system') {
         } else {
             commandLine 'echo', 'Skipping Fluent-Bit installation.'
         }
-
-        def securityEnabled37 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******after runFluentBitInstall****build.gradle@runFluentBitInstall@securityEnabled37 - " +securityEnabled37+ ", *********************"
-
-        def tlsEnabled3 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****after runFluentBitInstall***build.gradle@runFluentBitInstall@tlsEnabled3 - " +tlsEnabled3+ ", *********************"
     }
 
     task fetchSystemTestLogs(type: Exec) {
@@ -1248,18 +1180,6 @@ project('test:system') {
     }
 
     task startK8SystemTests(type: Test) {
-
-        def securityEnabled34 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "*******start****build.gradle@startK8SystemTests@securityEnabled34 - " +securityEnabled34+ ", *********************"
-
-        def tlsEnabled = System.getProperty("tlsEnabled", "false")
-        println "***********build.gradle@startK8SystemTests@tlsEnabled - " +tlsEnabled+ ", *********************"
-
-
-        def tlsEnabled12 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "***********build.gradle@startK8SystemTests@tlsEnabled12 - " +tlsEnabled12+ ", *********************"
-
-
         dependsOn 'copyTestsToK8sCluster', 'runFluentBitInstall' // ensure test artifacts are copied to the cluster.
         description 'Used to invoke K8s based System Tests, example usage: gradle startK8SystemTests'
 
@@ -1339,26 +1259,14 @@ project('test:system') {
         systemProperty "tlsEnabled", System.getProperty("tlsEnabled", "false")
         systemProperty "log.level", System.getProperty("log.level", "DEBUG")
 
-
-        def tlsEnabled1 = System.getProperty("tlsEnabled", "false")
-        println "******1*****build.gradle@startK8SystemTests@tlsEnabled - " +tlsEnabled1+ ", *********************"
-
         if (System.getProperty("configFile") != null) {
             systemProperty "configs", new File(System.getProperty("configFile")).text
         }
         maxParallelForks = 1
 
-
-
         if (System.getProperty("failFast", "false") == "true") {
             failFast = true
         }
-
-        def tlsEnabled133 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*******end of fail fast****build.gradle@startK8SystemTests@tlsEnabled133 - " +tlsEnabled133+ ", *********************"
-
-        def securityEnabled33 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "*******end of fail fast****build.gradle@startK8SystemTests@securityEnabled33 - " +securityEnabled33+ ", *********************"
     }
 
     task execShellScript(type: Exec) {
@@ -1397,13 +1305,7 @@ project('test:system') {
     //This is  used to invoke docker based systemTests
     task startSystemTestsWithDocker(type: Test) {
 
-        def securityEnabled37 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******start startSystemTestsWithDocker****build.gradle@startSystemTestsWithDocker@securityEnabled37 - " +securityEnabled37+ ", *****************"
-
-        def tlsEnabled3 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****start startSystemTestsWithDocker***build.gradle@startSystemTestsWithDocker@tlsEnabled3 - " +tlsEnabled3+ ", *********************"
-
-       // tasks.withType(Exec) { environment "tlsEnabled", System.getProperty("tlsEnabled", "false") }
+        tasks.withType(Exec) { environment "tlsEnabled", System.getProperty("tlsEnabled", "false") }
         dependsOn 'testJarForDocker', 'execShellScript'
 
         if (System.getProperty("awsExec").equals("true")) {
@@ -1453,12 +1355,6 @@ project('test:system') {
         systemProperty "dockerImageRegistry", "${dockerRegistryUrl}"
         systemProperty "log.level", System.getProperty("log.level", "DEBUG")
         systemProperty "tlsEnabled", System.getProperty("tlsEnabled", "false")
-
-        def securityEnabled38 = System.getenv().getOrDefault("securityEnabled", System.getProperty("securityEnabled", "false"));
-        println "******end startSystemTestsWithDocker****build.gradle@startSystemTestsWithDocker@securityEnabled38 - " +securityEnabled38+ ", *****************"
-
-        def tlsEnabled4 = System.getenv().getOrDefault("tlsEnabled", System.getProperty("tlsEnabled", "false"));
-        println "*****end startSystemTestsWithDocker***build.gradle@startSystemTestsWithDocker@tlsEnabled4 - " +tlsEnabled4+ ", *********************"
 
     }
 

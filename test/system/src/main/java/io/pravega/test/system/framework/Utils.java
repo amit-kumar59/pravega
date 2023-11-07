@@ -35,10 +35,8 @@ import io.pravega.test.system.framework.services.marathon.ZookeeperService;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Map;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.auth.AUTH;
 
 import java.net.URI;
 
@@ -75,11 +73,6 @@ public class Utils {
      * @return the configuration value.
      */
     public static String getConfig(final String key, final String defaultValue) {
-        Map<String, String> config = System.getenv();
-        config.forEach((k, value) ->{
-            log.info("****22** Utils@config : key::{} ***values ::{} ****required key ::{}",k, value,key);
-        });
-        log.info("*************************************************************************");
         return System.getenv().getOrDefault(key, System.getProperty(key, defaultValue));
     }
 
@@ -154,36 +147,25 @@ public class Utils {
 
     private static ImmutableMap<String, String> readPravegaProperties() {
         String resourceName = PROPERTIES_FILE;
-
-        log.info("****Utils@readPravegaProperties ::AUTH_ENABLED :{} and TLS_AND_AUTH_ENABLED::{} ", AUTH_ENABLED,TLS_AND_AUTH_ENABLED);
-
         if (AUTH_ENABLED) {
             resourceName = PROPERTIES_FILE_WITH_AUTH;
-            log.info(" *********Utils@readPravegaProperties*** AUTH_ENABLED::{} and resource name ::{}",AUTH_ENABLED,resourceName);
         }
         if (TLS_AND_AUTH_ENABLED)  {
             resourceName = PROPERTIES_FILE_WITH_TLS;
-            log.info(" *********Utils@readPravegaProperties*** TLS_AND_AUTH_ENABLED::{} and resource name ::{}",TLS_AND_AUTH_ENABLED,resourceName);
         }
+
+        log.info("AUTH_ENABLED :{} TLS_AND_AUTH_ENABLED:{} resourceName :{}", AUTH_ENABLED, TLS_AND_AUTH_ENABLED, resourceName);
+
         Properties props = new Properties();
-        log.info(" *********Utils@readPravegaProperties*** CONFIGS::{}",System.getProperty(CONFIGS));
         if (System.getProperty(CONFIGS) != null) {
             try {
                 props.load(new StringReader(System.getProperty(CONFIGS)));
-
-                props.forEach((key, value) ->{
-                    log.info("***111*** Utils@readPravegaProperties : key::{} ***values ::{} ****",key, value);
-                });
             } catch (IOException e) {
                 log.error("Error reading custom config file.", e);
             }
         }
         try {
-            log.info("*******Utils@readPravegaProperties********resourceName ::{}",resourceName);
             props.load(Utils.class.getClassLoader().getResourceAsStream(resourceName));
-            props.forEach((key, value) ->{
-                log.info("****22** Utils@readPravegaProperties : key::{} ***values ::{} ****",key, value);
-            });
         } catch (IOException e) {
             log.error("Error reading properties file.", e);
         }
@@ -194,7 +176,7 @@ public class Utils {
 
     public static ClientConfig buildClientConfig(URI controllerUri) {
         if (TLS_AND_AUTH_ENABLED) {
-            log.info("Generating config with tls and auth enabled.");
+            log.debug("Generating config with tls and auth enabled.");
             return ClientConfig.builder()
                                // TLS-related client-side configuration
                                .trustStore(DEFAULT_TRUSTSTORE_PATH)
@@ -205,7 +187,7 @@ public class Utils {
                                .connectTimeoutMilliSec(120000)
                                .build();
         } else if (AUTH_ENABLED) {
-            log.info("Generating config with auth enabled.");
+            log.debug("Generating config with auth enabled.");
             return ClientConfig.builder()
                                // auth
                                .credentials(new DefaultCredentials("1111_aaaa", "admin"))
@@ -213,7 +195,7 @@ public class Utils {
                                .connectTimeoutMilliSec(120000)
                                .build();
         } else {
-            log.info("Generating config with tls and auth disabled.");
+            log.debug("Generating config with tls and auth disabled.");
             return ClientConfig.builder().controllerURI(controllerUri).connectTimeoutMilliSec(120000).build();
         }
     }
@@ -247,17 +229,12 @@ public class Utils {
 
     private static boolean isAuthEnabled() {
         String securityEnabled = Utils.getConfig("securityEnabled", "false");
-        log.info("****Utils@securityEnabled:::{}**",securityEnabled);
         return Boolean.valueOf(securityEnabled);
     }
 
     private static boolean isTLSEnabled() {
         String tlsEnabled = Utils.getConfig("tlsEnabled", "false");
-        String tlsStatus = System.getProperty("tlsEnabled","false");
-        log.info("****Utils@isTLSEnabled::********* tlsStatus ::{} ***boolean status ::{} **tlsEnabled ::{}", tlsStatus,Boolean.valueOf(tlsStatus),tlsEnabled);
-       // return Boolean.valueOf(tlsStatus);
-        return true;
-
+        return Boolean.valueOf(tlsEnabled);
     }
 
     public static boolean isSkipLogDownloadEnabled() {

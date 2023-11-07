@@ -109,12 +109,12 @@ public abstract class AbstractService implements Service {
             return CompletableFuture.completedFuture(null);
         }
 
-        props.forEach((k, value) ->{
-            log.info("****AbstractService@deployPravegaOnlyCluster ****33****: key::{} ***values ::{}",k, value);
+        log.info("Pravega property");
+        props.forEach((key, value) -> {
+            log.info("Key:{} Values :{}", key, value);
         });
 
-        return registerTLSSecret()
-                .thenCompose(v -> k8sClient.createSecret(NAMESPACE, authSecret()))
+        return k8sClient.createSecret(NAMESPACE, authSecret())
                 .thenCompose(v -> k8sClient.createAndUpdateCustomObject(CUSTOM_RESOURCE_GROUP_PRAVEGA, CUSTOM_RESOURCE_VERSION_PRAVEGA,
                 NAMESPACE, CUSTOM_RESOURCE_PLURAL_PRAVEGA,
                 getPravegaOnlyDeployment(zkUri.getAuthority(),
@@ -149,10 +149,6 @@ public abstract class AbstractService implements Service {
                 .put("controllerSecret", SECRET_NAME_USED_FOR_CONTROLLER)
                 .put("segmentStoreSecret", SECRET_NAME_USED_FOR_SEGMENT_STORE)
                 .build();
-
-        staticTlsSpec.forEach((k, value) ->{
-            log.info("****AbstractService@buildPravegaClusterSpecWithBookieUri *****11****: key::{} ***values ::{}",k, value);
-        });
 
         final Map<String, Object> tlsSpec = ImmutableMap.<String, Object>builder()
                 .put("static", staticTlsSpec)
@@ -194,18 +190,10 @@ public abstract class AbstractService implements Service {
                 .put("pravega", pravegaSpec);
         builder.put("version", PRAVEGA_VERSION);
 
-        log.info("******AbstractService@buildPravegaClusterSpecWithBookieUri ::{}****",Utils.TLS_AND_AUTH_ENABLED);
+        log.info("TLS_AND_AUTH_ENABLED :{} AUTH_ENABLED :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED);
         if (Utils.TLS_AND_AUTH_ENABLED) {
-            tlsSpec.forEach((k, value) ->{
-                log.info("****AbstractService@buildPravegaClusterSpecWithBookieUri inside if: key::{} ***values ::{}",k, value);
-            });
             builder.put("tls", tlsSpec);
         }
-
-        tlsSpec.forEach((k, value) ->{
-            log.info("****AbstractService@buildPravegaClusterSpecWithBookieUri outside if: key::{} ***values ::{}",k, value);
-        });
-
         if (Utils.AUTH_ENABLED) {
             builder.put("authentication", authGenericSpec);
         }
@@ -337,8 +325,7 @@ public abstract class AbstractService implements Service {
     }
 
     private CompletableFuture<V1Secret> registerTLSSecret() {
-        log.info("*********AbstractService@registerTLSSecretTLS_AND_AUTH_ENABLED::{}*******************",Utils.TLS_AND_AUTH_ENABLED);
-       /* if (!Utils.TLS_AND_AUTH_ENABLED) {
+        if (!Utils.TLS_AND_AUTH_ENABLED) {
             return CompletableFuture.completedFuture(null);
         }
         try {
@@ -350,7 +337,7 @@ public abstract class AbstractService implements Service {
             return k8sClient.createSecret(NAMESPACE, secret);
         } catch (Exception e) {
             log.error("Could not register secret: ", e);
-        }*/
+        }
         return CompletableFuture.completedFuture(null);
     }
 
