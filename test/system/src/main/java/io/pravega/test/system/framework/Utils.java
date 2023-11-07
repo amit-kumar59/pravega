@@ -253,8 +253,11 @@ public class Utils {
 
     private static boolean isTLSEnabled() {
         String tlsEnabled = Utils.getConfig("tlsEnabled", "false");
-        log.info("****Utils@isTLSEnabled:::{}**",tlsEnabled);
-        return Boolean.valueOf(tlsEnabled);
+        String tlsStatus = System.getProperty("tlsEnabled");
+        
+        log.info("****Utils@isTLSEnabled:::{}*********** tlsStatus ::{}",tlsEnabled, tlsStatus);
+        //return Boolean.valueOf(tlsEnabled);
+        return true;
     }
 
     public static boolean isSkipLogDownloadEnabled() {
