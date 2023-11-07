@@ -252,12 +252,12 @@ public class Utils {
     }
 
     private static boolean isTLSEnabled() {
-        String tlsEnabled = Utils.getConfig("tlsEnabled", "false");
-        String tlsStatus = System.getProperty("tlsEnabled");
-        
-        log.info("****Utils@isTLSEnabled:::{}*********** tlsStatus ::{}",tlsEnabled, tlsStatus);
-        //return Boolean.valueOf(tlsEnabled);
+        //String tlsEnabled = Utils.getConfig("tlsEnabled", "false");
+        String tlsStatus = System.getProperty("tlsEnabled","false");
+        log.info("****Utils@isTLSEnabled::********* tlsStatus ::{} ***boolean status ::{}", tlsStatus,Boolean.valueOf(tlsStatus));
+       // return Boolean.valueOf(tlsStatus);
         return true;
+
     }
 
     public static boolean isSkipLogDownloadEnabled() {
