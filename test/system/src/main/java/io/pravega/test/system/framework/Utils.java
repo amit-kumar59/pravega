@@ -177,6 +177,7 @@ public class Utils {
     public static ClientConfig buildClientConfig(URI controllerUri) {
         if (TLS_AND_AUTH_ENABLED) {
             log.debug("Generating config with tls and auth enabled.");
+            log.info("***Utils@buildClientConfig DEFAULT_TRUSTSTORE_PATH ::{} and VALIDATE_HOSTNAME ::{} ::AUTH_ENABLED::{}",DEFAULT_TRUSTSTORE_PATH,VALIDATE_HOSTNAME,AUTH_ENABLED);
             return ClientConfig.builder()
                                // TLS-related client-side configuration
                                .trustStore(DEFAULT_TRUSTSTORE_PATH)

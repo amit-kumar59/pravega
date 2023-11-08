@@ -42,6 +42,7 @@ public class SocketConnectionFactoryImpl implements ConnectionFactory {
 
     public SocketConnectionFactoryImpl(ClientConfig clientConfig) {
         this(clientConfig, (Integer) null);
+        log.info("SocketConnectionFactoryImpl@constructor clientconfig::{}", clientConfig.getControllerURI().getHost());
     }
 
     @VisibleForTesting

@@ -364,9 +364,13 @@ public class ControllerImpl implements Controller {
 
     @Override
     public CompletableFuture<Boolean> createScope(final String scopeName) {
+        log.info("***COntrollerImpl@createScope start scope name : {}", scopeName);
+
         Exceptions.checkNotClosed(closed.get(), this);
         final long requestId = requestIdGenerator.get();
         long traceId = LoggerHelpers.traceEnter(log, "createScope", scopeName, requestId);
+
+        log.info("***COntrollerImpl@createScope request id : {} traceid ::{}", requestId , traceId);
 
         final CompletableFuture<CreateScopeStatus> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<CreateScopeStatus> callback = new RPCAsyncCallback<>(requestId, "createScope", scopeName);
@@ -374,6 +378,7 @@ public class ControllerImpl implements Controller {
                                                         .createScope(ScopeInfo.newBuilder().setScope(scopeName).build(), callback);
             return callback.getFuture();
         }, this.executor);
+        log.info("***COntrollerImpl@createScope scope creation has completed : {}", scopeName);
         return result.thenApplyAsync(x -> {
             switch (x.getStatus()) {
             case FAILURE:
@@ -616,11 +621,17 @@ public class ControllerImpl implements Controller {
 
     @Override
     public CompletableFuture<Boolean> createStream(String scope, String streamName, final StreamConfiguration streamConfig) {
+        log.info("***ControllerImple@CreateStream create stream started streamName: {}", streamName);
+
         Exceptions.checkNotNullOrEmpty(scope, "scope");
         Exceptions.checkNotClosed(closed.get(), this);
         Preconditions.checkNotNull(streamConfig, "streamConfig");
+        log.info("***ControllerImple@CreateStream preconding and all the check has passed streamName: {}", streamName);
+
         final long requestId = requestIdGenerator.get();
         long traceId = LoggerHelpers.traceEnter(log, "createStream", streamConfig, requestId);
+
+        log.info("***ControllerImple@CreateStream requestId:: {} traceId::{}", requestId,traceId);
 
         final CompletableFuture<CreateStreamStatus> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<CreateStreamStatus> callback = new RPCAsyncCallback<>(requestId, 
@@ -630,6 +641,7 @@ public class ControllerImpl implements Controller {
                     callback);
             return callback.getFuture();
         }, this.executor);
+        log.info("***ControllerImple@CreateStream create stream completed streamName: {}", streamName);
         return result.thenApplyAsync(x -> {
             switch (x.getStatus()) {
             case FAILURE:
