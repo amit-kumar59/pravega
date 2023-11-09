@@ -178,7 +178,7 @@ public class K8SequentialExecutor implements TestExecutor {
             if(hostAliaseList == null){
                 hostAliaseList  =  new ArrayList<>();
             }
-            hostAliaseList.add(new V1HostAlias().addHostnamesItem("127.0.0.1").ip(IPs.get(0).toString()));
+            hostAliaseList.add(new V1HostAlias().addHostnamesItem("pravega").ip(IPs.get(0).toString()));
             pod.getSpec().setHostAliases(hostAliaseList);
 
             log.info("********K8SequentialExecutor@getTestpos Alliase  ::{} ", pod.getSpec().getHostAliases());
