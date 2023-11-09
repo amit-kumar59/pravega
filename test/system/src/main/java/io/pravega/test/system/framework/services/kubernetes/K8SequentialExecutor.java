@@ -174,9 +174,12 @@ public class K8SequentialExecutor implements TestExecutor {
 
             log.info("********K8SequentialExecutor@getTestpos get volume spec ::{} ", pod.getSpec().getVolumes());
 
-            List<V1HostAlias> hostAliases  =  new ArrayList<>(pod.getSpec().getHostAliases());
-            hostAliases.add(new V1HostAlias().addHostnamesItem("127.0.0.1").ip(IPs.get(0).toString()));
-            pod.getSpec().setHostAliases(hostAliases);
+            List<V1HostAlias> hostAliaseList =pod.getSpec().getHostAliases();
+            if(hostAliaseList == null){
+                hostAliaseList  =  new ArrayList<>();
+            }
+            hostAliaseList.add(new V1HostAlias().addHostnamesItem("127.0.0.1").ip(IPs.get(0).toString()));
+            pod.getSpec().setHostAliases(hostAliaseList);
 
             log.info("********K8SequentialExecutor@getTestpos Alliase  ::{} ", pod.getSpec().getHostAliases());
 
