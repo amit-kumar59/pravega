@@ -1226,7 +1226,7 @@ project('test:system') {
         // target versions wrt Upgrade for all operators & clusters
         systemProperty "controllerLabel", System.getProperty("controllerLabel", "pravega-controller");
         systemProperty "segmentstoreLabel", System.getProperty("segmentstoreLabel", "pravega-segmentstore");
-        systemProperty "tlsSecretName", System.getProperty("tlsSecretName", "selfsigned-cert-tls");
+        systemProperty "tlsSecretName", System.getProperty("tlsSecretName", "controller-tls");
         systemProperty "bookkeeperLabel", System.getProperty("bookkeeperLabel", "bookie");
         systemProperty "pravegaID", System.getProperty("pravegaID", "pravega");
         systemProperty "bookkeeperID", System.getProperty("bookkeeperID", "pravega-bk");
