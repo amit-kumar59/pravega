@@ -95,13 +95,14 @@ public class PravegaTest extends AbstractReadWriteTest {
         @Cleanup
         ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(Utils.buildClientConfig(controllerUri));
 
-        log.info("***PravegaTest@simpleTest connection Factory {}", connectionFactory.toString());
+        log.info("***PravegaTest@simpleTest before controller connection Factory {}", connectionFactory);
 
         @Cleanup
         ControllerImpl controller = new ControllerImpl(ControllerImplConfig.builder()
                                                                            .clientConfig(Utils.buildClientConfig(controllerUri))
                                                                            .build(), connectionFactory.getInternalExecutor());
 
+        log.info("***PravegaTest@simpleTest after controller connection Factory {}", connectionFactory);
 
         ControllerImplConfig config1 = ControllerImplConfig.builder()
                 .clientConfig(Utils.buildClientConfig(controllerUri)).build();
