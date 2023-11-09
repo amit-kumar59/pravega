@@ -159,51 +159,33 @@ public class K8SequentialExecutor implements TestExecutor {
                 ))
                 .restartPolicy("Never"));
         if (Utils.TLS_AND_AUTH_ENABLED) {
-            /*List<V1Volume> volumes = new ArrayList<>(pod.getSpec().getVolumes());
-            volumes.add(new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().secretName(Utils.TLS_SECRET_NAME)));
-            pod.getSpec().setVolumes(volumes);
-            List<V1VolumeMount> volumeMounts = new ArrayList<>(pod.getSpec().getContainers().get(0).getVolumeMounts());
-            volumeMounts.add(new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert"));
-            pod.getSpec().getContainers().get(0).setVolumeMounts(volumeMounts);*/
+
             List<URI> IPs =Futures.getAndHandleExceptions(client.getStatusOfPodWithLabel(NAMESPACE, "component", "pravega-controller")
                             .thenApply(statuses -> statuses.stream()
                                     .flatMap(s -> Stream.of(URI.create( s.getPodIP() )))
                                     .collect(Collectors.toList())),
                     t -> new TestFrameworkException(RequestFailed, "Failed to fetch ServiceDetails for pravega-controller", t));
+
             log.info("********K8SequentialExecutor@getTestpos IPS ::{} IP ::{}", IPs, IPs.get(0).toString());
 
-           /* pod  = new V1PodBuilder(pod).editSpec().addToVolumes(new V1VolumeBuilder().withName("tls-cert")
-                            .withSecret(new V1SecretVolumeSourceBuilder().withDefaultMode(420).withSecretName(Utils.TLS_SECRET_NAME).build())
-                            .build())
-                    .addToHostAliases(new V1HostAlias().addHostnamesItem(Utils.getConfig("127.0.0.1", "pravega")).ip(IPs.get(0).toString()))
-                    .editContainer(0)
-                    .addToVolumeMounts(new V1VolumeMountBuilder().withMountPath(Utils.TLS_MOUNT_PATH).withName("tls-cert").build())
-                    .endContainer()
-                    .endSpec()
-                    .build();*/
+            List<V1Volume> volumes = new ArrayList<>(pod.getSpec().getVolumes());
+            volumes.add(new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().defaultMode(420).secretName(Utils.TLS_SECRET_NAME)));
+            pod.getSpec().setVolumes(volumes);
+
             log.info("********K8SequentialExecutor@getTestpos get volume spec ::{} ", pod.getSpec().getVolumes());
 
-            V1Volume v1Volume = new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().defaultMode(420).secretName("controller-tls"));
-            log.info("********K8SequentialExecutor@getTestpos v1 volume getsecrt ::{} ", v1Volume.getSecret());
-            log.info("********K8SequentialExecutor@getTestpos v1 volume name ::{} v1volume :{} ", v1Volume.getName(), v1Volume);
+            List<V1HostAlias> hostAliases  =  new ArrayList<>(pod.getSpec().getHostAliases());
+            hostAliases.add(new V1HostAlias().addHostnamesItem("127.0.0.1").ip(IPs.get(0).toString()));
+            pod.getSpec().setHostAliases(hostAliases);
 
-            pod.getSpec().getVolumes().add(new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().defaultMode(420).secretName("controller-tls")));
-            log.info("********K8SequentialExecutor@getTestpos **controller-tls secret name added**");
+            log.info("********K8SequentialExecutor@getTestpos Alliase  ::{} ", pod.getSpec().getHostAliases());
 
-            log.info("********K8SequentialExecutor@getTestpos **container name ::{}",pod.getSpec().getContainers().get(0).getName());
-            log.info("********K8SequentialExecutor@getTestpos **container details ::{}",pod.getSpec().getContainers().get(0));
+            List<V1VolumeMount> volumeMounts = new ArrayList<>(pod.getSpec().getContainers().get(0).getVolumeMounts());
+            volumeMounts.add(new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert"));
+            pod.getSpec().getContainers().get(0).setVolumeMounts(volumeMounts);
 
-            V1VolumeMount v1VolumeMount =  new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert");
-            log.info("********K8SequentialExecutor@getTestpos **mount path::{} ** mountpropagation ::{}", v1VolumeMount.getMountPath(), v1VolumeMount.getMountPropagation());
-
-
-            pod.getSpec().getContainers().get(0).addVolumeMountsItem(new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert"));
-            log.info("********K8SequentialExecutor@getTestpos **mount path added**");
-
-
-            pod.getSpec().addHostAliasesItem(new V1HostAlias().addHostnamesItem("127.0.0.1").ip(IPs.get(0).toString()));
-
-            log.info("********K8SequentialExecutor@getTestpos **end of host name added pod pecs::{} ,pod->{} ", pod.getSpec(),pod);
+            log.info("********K8SequentialExecutor@getTestpos VolumeMounts  ::{} ", pod.getSpec().getContainers().get(0).getVolumeMounts());
+            log.info("********K8SequentialExecutor@getTestpos **end of host name added pod->{} ",pod);
         }
         return pod;
     }

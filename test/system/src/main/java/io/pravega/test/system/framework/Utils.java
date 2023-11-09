@@ -59,7 +59,7 @@ public class Utils {
     public static final String PROPERTIES_FILE = "pravega.properties";
     public static final String PROPERTIES_FILE_WITH_AUTH = "pravega_withAuth.properties";
     public static final String PROPERTIES_FILE_WITH_TLS = "pravega_withTLS.properties";
-    public static final String TLS_SECRET_NAME = "selfsigned-cert-tls";
+    public static final String TLS_SECRET_NAME = "controller-tls";
     public static final String TLS_MOUNT_PATH = "/etc/secret-volume";
     public static final ImmutableMap<String, String> PRAVEGA_PROPERTIES = readPravegaProperties();
     public static final String DEFAULT_TRUSTSTORE_PATH = TLS_MOUNT_PATH + "/tls.crt";
