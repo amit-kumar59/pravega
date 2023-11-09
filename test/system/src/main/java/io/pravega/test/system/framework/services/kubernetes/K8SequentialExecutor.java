@@ -181,10 +181,29 @@ public class K8SequentialExecutor implements TestExecutor {
                     .endContainer()
                     .endSpec()
                     .build();*/
-            pod.getSpec().getVolumes().add(new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().secretName("tls.crt")));
+            log.info("********K8SequentialExecutor@getTestpos get volume spec ::{} ", pod.getSpec().getVolumes());
+
+            V1Volume v1Volume = new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().defaultMode(420).secretName("controller-tls"));
+            log.info("********K8SequentialExecutor@getTestpos v1 volume getsecrt ::{} ", v1Volume.getSecret());
+            log.info("********K8SequentialExecutor@getTestpos v1 volume name ::{} v1volume :{} ", v1Volume.getName(), v1Volume);
+
+            pod.getSpec().getVolumes().add(new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().defaultMode(420).secretName("controller-tls")));
+            log.info("********K8SequentialExecutor@getTestpos **controller-tls secret name added**");
+
+            log.info("********K8SequentialExecutor@getTestpos **container name ::{}",pod.getSpec().getContainers().get(0).getName());
+            log.info("********K8SequentialExecutor@getTestpos **container details ::{}",pod.getSpec().getContainers().get(0));
+
+            V1VolumeMount v1VolumeMount =  new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert");
+            log.info("********K8SequentialExecutor@getTestpos **mount path::{} ** mountpropagation ::{}", v1VolumeMount.getMountPath(), v1VolumeMount.getMountPropagation());
+
+
             pod.getSpec().getContainers().get(0).addVolumeMountsItem(new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert"));
-            pod.getSpec().addHostAliasesItem(new V1HostAlias().addHostnamesItem(Utils.getConfig("127.0.0.1", "pravega")).ip(IPs.get(0).toString()));
-            log.info("********K8SequentialExecutor@getTestpos **end of gettestPods method**");
+            log.info("********K8SequentialExecutor@getTestpos **mount path added**");
+
+
+            pod.getSpec().addHostAliasesItem(new V1HostAlias().addHostnamesItem("127.0.0.1").ip(IPs.get(0).toString()));
+
+            log.info("********K8SequentialExecutor@getTestpos **end of host name added pod pecs::{} ,pod->{} ", pod.getSpec(),pod);
         }
         return pod;
     }
