@@ -76,6 +76,7 @@ public class PravegaTest extends AbstractReadWriteTest {
         URI zkUri = startZookeeperInstance();
         startBookkeeperInstances(zkUri);
         URI controllerUri = ensureControllerRunning(zkUri);
+        controllerUri =  URI.create("tls://pravega:9090");
         ensureSegmentStoreRunning(zkUri, controllerUri);
     }
 
