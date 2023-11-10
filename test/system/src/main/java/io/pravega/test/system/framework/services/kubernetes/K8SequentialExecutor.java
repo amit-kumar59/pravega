@@ -140,7 +140,7 @@ public class K8SequentialExecutor implements TestExecutor {
     }
 
     private V1Pod getTestPod(String className, String methodName, String podName, K8sClient client) {
-        log.info("Running test pod with security enabled :{}, transport enabled: {}", Utils.AUTH_ENABLED, Utils.TLS_AND_AUTH_ENABLED);
+        log.info("Running test pod with security/auth enabled :{}, transport enabled: {}", Utils.AUTH_ENABLED, Utils.TLS_AND_AUTH_ENABLED);
         V1Pod pod =  new V1Pod()
                 .metadata(new V1ObjectMeta().name(podName).namespace(NAMESPACE).labels(ImmutableMap.of("POD_NAME", podName, "app", APP)))
                 .spec( new V1PodSpec().serviceAccountName(SERVICE_ACCOUNT).automountServiceAccountToken(true)
@@ -158,7 +158,7 @@ public class K8SequentialExecutor implements TestExecutor {
                 .volumeMounts(ImmutableList.of(new V1VolumeMount().mountPath("/data").name("task-pv-storage")))
                 ))
                 .restartPolicy("Never"));
-        if (Utils.TLS_AND_AUTH_ENABLED) {
+        if (Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) {
 
             List<URI> IPs =Futures.getAndHandleExceptions(client.getStatusOfPodWithLabel(NAMESPACE, "component", "pravega-controller")
                             .thenApply(statuses -> statuses.stream()
