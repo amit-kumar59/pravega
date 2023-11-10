@@ -23,8 +23,6 @@ echo "Secret creation has started for $CONTROLLER_SECRET_NAME and $SEGMENT_STORE
 
 # Set the namespace, we want to create the secret
 NAMESPACE="default"
-#tlsEnabled=true
-#securityEnabled=true
 
 # Define the secrets we want to delete
 secrets_to_delete=("controller-tls" "segmentstore-tls")
@@ -35,7 +33,6 @@ echo "Security auth enable status : $securityEnabled"
 # Delete secret if it exists
 if [ "$tlsEnabled" == "true" ] && [ "$securityEnabled" == "true" ]; then
     # Delete existing secrets
-    #kubectl delete secret password-auth controller-tls segmentstore-tls
     # Loop through and delete each secret if it exists
     for secret in "${secrets_to_delete[@]}"; do
         kubectl get secret $secret &> /dev/null
@@ -96,4 +93,3 @@ if [ $? -eq 0 ]; then
 else
   echo "Error creating Kubernetes secret '$SEGMENT_STORE_SECRET_NAME' in namespace '$NAMESPACE'."
 fi
-echo "Secret creation has finished successfully for $CONTROLLER_SECRET_NAME and $SEGMENT_STORE_SECRET_NAME"

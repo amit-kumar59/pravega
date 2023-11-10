@@ -84,7 +84,7 @@ abstract class AbstractSystemTest {
         }
 
         List<URI> conUris = conService.getServiceDetails();
-        log.debug("Pravega Controller service details: {}", conUris);
+        log.info("Pravega Controller service details: {}", conUris);
         return conUris.get(0);
     }
 

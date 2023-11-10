@@ -1257,6 +1257,7 @@ project('test:system') {
 
         systemProperty "securityEnabled", System.getProperty("securityEnabled", "false")
         systemProperty "tlsEnabled", System.getProperty("tlsEnabled", "false")
+        systemProperty "tlsCertCNName", System.getProperty("tlsCertCNName", "pravega")
         systemProperty "log.level", System.getProperty("log.level", "DEBUG")
 
         if (System.getProperty("configFile") != null) {

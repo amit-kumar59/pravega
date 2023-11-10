@@ -76,7 +76,7 @@ public class PravegaTest extends AbstractReadWriteTest {
         URI zkUri = startZookeeperInstance();
         startBookkeeperInstances(zkUri);
         URI controllerUri = ensureControllerRunning(zkUri);
-        controllerUri =  URI.create("tls://pravega:9090");
+       // controllerUri =  URI.create("tls://pravega:9090");
         ensureSegmentStoreRunning(zkUri, controllerUri);
     }
 
@@ -89,8 +89,8 @@ public class PravegaTest extends AbstractReadWriteTest {
     public void simpleTest() {
         Service conService = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = conService.getServiceDetails();
-        //URI controllerUri = ctlURIs.get(0);
-        URI controllerUri = URI.create("tls://pravega:9090");
+        URI controllerUri = ctlURIs.get(0);
+       // URI controllerUri = URI.create("tls://pravega:9090");
 
         log.info("Invoking create stream with Controller URI: {}", controllerUri);
 
