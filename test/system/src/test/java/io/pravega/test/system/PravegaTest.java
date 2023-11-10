@@ -89,7 +89,8 @@ public class PravegaTest extends AbstractReadWriteTest {
     public void simpleTest() {
         Service conService = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = conService.getServiceDetails();
-        URI controllerUri = ctlURIs.get(0);
+        //URI controllerUri = ctlURIs.get(0);
+        URI controllerUri = URI.create("tls://pravega:9090");
 
         log.info("Invoking create stream with Controller URI: {}", controllerUri);
 
