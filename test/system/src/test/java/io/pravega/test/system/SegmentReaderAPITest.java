@@ -317,6 +317,12 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 connectionFactory.getInternalExecutor());
         Stream stream = Stream.of(streamScope, streamName);
 
+
+        ControllerImplConfig config = ControllerImplConfig.builder()
+                .clientConfig(Utils.buildClientConfig(controllerURI)).build();
+
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest controller config :: {}",config);
+
         @Cleanup
         ClientFactoryImpl clientFactory = new ClientFactoryImpl(streamScope, controller, connectionFactory);
         log.info("Invoking Writer test with Controller URI: {}", controllerURI);
@@ -341,7 +347,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         // write events to stream 30 * 5  = 150 bytes
         writeEvents(5, writer);
         writer.flush();
-
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest 5 events written has completed. ");
         //Requested next stream cut at a distance of 180 bytes, and getting the next approx offset as a response.
         StreamCut streamCut1 = batchClient.getNextStreamCut(streamCut0, approxDistanceToNextOffset);
         long streamCut1Position = streamCut1.asImpl().getPositions().get(list.get(0)).longValue();
@@ -351,7 +357,13 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         @Cleanup
         ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, controllerURI);
         ReaderGroupConfig readerGroupConfig1 = getReaderGroupConfig(streamCut0, streamCut1, stream);
+
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroupConfig1 :{} ",readerGroupConfig1);
+
         groupManager.createReaderGroup(readerGroupName, readerGroupConfig1);
+
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest reader group has created.");
+
         @Cleanup
         ReaderGroup readerGroup = groupManager.getReaderGroup(readerGroupName);
 
