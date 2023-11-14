@@ -367,12 +367,16 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         @Cleanup
         ReaderGroup readerGroup = groupManager.getReaderGroup(readerGroupName);
 
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroup ::{}",readerGroup);
+
         //Reading the events between the two streamCut, startStreamCut = streamCut0 and endStreamCut = streamCut1
         @Cleanup
         EventStreamReader<String> reader0 = clientFactory.createReader(readerName,
                 readerGroupName,
                 new UTF8StringSerializer(),
                 ReaderConfig.builder().build());
+
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest reader0 ::{}",reader0);
 
         int readCount1 = readEvent(reader0, streamCut1Position / 30);
         assertEquals(readCount1, streamCut1Position / 30);

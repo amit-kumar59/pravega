@@ -176,10 +176,12 @@ public class StateSynchronizerImpl<StateT extends Revisioned>
     @Override
     public void initialize(InitialUpdate<StateT> initial) {
         Revision result = client.writeConditionally(new RevisionImpl(segment, 0, 0), new UpdateOrInit<>(initial));
+        log.info("*****StateSynchronizerImpl@initialize result::{}",result);
         if (result == null) {
-            log.info("Segment {} was already initialized", segment);
+            log.info("****if**Segment {} was already initialized", segment);
             handleTruncation();
         } else {
+            log.info("**else***StateSynchronizerImpl@initialize scopeStreamName::{}",segment.getScopedStreamName());
             updateCurrentState(initial.create(segment.getScopedStreamName(), result));
         }
     }
@@ -261,9 +263,12 @@ public class StateSynchronizerImpl<StateT extends Revisioned>
 
     @Synchronized
     private void updateCurrentState(StateT newValue) {
+        log.info("***StateSynchronizerImpl@updteCUrrentState ::currentState::{}**",currentState);
+        log.info("***StateSynchronizerImpl@updteCUrrentState ::newVlaues::{}**",newValue);
         if (newValue != null && isNewer(newValue.getRevision())) {
             log.trace("Updating new state to {} ", newValue.getRevision());
             currentState = newValue;
+
         }
     }
 

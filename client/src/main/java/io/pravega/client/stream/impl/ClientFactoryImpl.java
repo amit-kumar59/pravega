@@ -243,11 +243,22 @@ public final class ClientFactoryImpl extends AbstractClientFactoryImpl implement
 
     private <T> RevisionedStreamClient<T> createRevisionedStreamClient(Segment segment, Serializer<T> serializer,
                                                                        SynchronizerConfig config) {
+        log.info("*******ClientFactoryImpl@createRevisionedStreamClient*****config :{} getEventWriter config ::{}", config , config.getEventWriterConfig());
         EventSegmentReader in = inFactory.createEventReaderForSegment(segment, config.getReadBufferSize());
+
+        log.info("*******ClientFactoryImpl@createRevisionedStreamClient*****in :{}", in);
+
         DelegationTokenProvider delegationTokenProvider = DelegationTokenProviderFactory.create(controller, segment,
                 AccessOperation.READ_WRITE);
+        log.info("*******ClientFactoryImpl@createRevisionedStreamClient*****delegationTokenProvider :{}", delegationTokenProvider.retrieveToken());
+
         ConditionalOutputStream cond = condFactory.createConditionalOutputStream(segment, delegationTokenProvider, config.getEventWriterConfig());
+
+        log.info("*******ClientFactoryImpl@createRevisionedStreamClient*****cond :{}", cond);
+
         SegmentMetadataClient meta = metaFactory.createSegmentMetadataClient(segment, delegationTokenProvider);
+        log.info("*******ClientFactoryImpl@createRevisionedStreamClient*****meta :{}", meta);
+
         return new RevisionedStreamClientImpl<>(segment, in, outFactory, cond, meta, serializer, config.getEventWriterConfig(), delegationTokenProvider, clientConfig);
     }
 
@@ -259,7 +270,9 @@ public final class ClientFactoryImpl extends AbstractClientFactoryImpl implement
                                 SynchronizerConfig config) {
         log.info("Creating state synchronizer with stream: {} and configuration: {}", streamName, config);
         val serializer = new UpdateOrInitSerializer<>(updateSerializer, initialSerializer);
+        log.info("Creating state synchronizer with serializer: {} ", serializer);
         val segment = getSegmentForRevisionedClient(scope, streamName);
+        log.info("Creating state synchronizer with segment: {} ", segment);
         return new StateSynchronizerImpl<StateT>(segment, createRevisionedStreamClient(segment, serializer, config));
     }
 
