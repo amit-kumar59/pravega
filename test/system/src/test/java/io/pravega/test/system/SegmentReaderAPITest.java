@@ -167,7 +167,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         assertTrue(180 <= streamCut1Position);
 
         @Cleanup
-        ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, controllerURI);
+        ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
         ReaderGroupConfig readerGroupConfig1 = getReaderGroupConfig(streamCut0, streamCut1, stream);
         groupManager.createReaderGroup(readerGroupName, readerGroupConfig1);
 
@@ -360,8 +360,10 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         ReaderGroupManager groupManager1 = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
         log.info("***Amit to do ReaderGroupManager groupManager1 :{}",groupManager1);
 
-        boolean readerGroupStatus = groupManager1.createReaderGroup("AmitReaderGroupName",
-                ReaderGroupConfig.builder().stream(Stream.of(streamScope, streamName)).build());
+        ReaderGroupConfig readerGroupConfig0 = ReaderGroupConfig.builder().stream(Stream.of(streamScope, streamName)).build();
+        log.info("***Amit to do *****readerGroupConfig0:{}***",readerGroupConfig0 );
+
+        boolean readerGroupStatus = groupManager1.createReaderGroup("AmitReaderGroupName", readerGroupConfig0);
         log.info("***Amit to do *****readerGroupStatus:{}***",readerGroupStatus);
 
         @Cleanup
@@ -374,14 +376,19 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         //TODO END
 
         @Cleanup
-        ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, controllerURI);
+        ReaderGroupManager groupManager2 = ReaderGroupManager.withScope(streamScope, controllerURI);
+        log.info("**********Amit groupManager2 :{}",groupManager2);
+
+        ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
+        log.info("**********Amit groupManager :{}",groupManager);
+
         ReaderGroupConfig readerGroupConfig1 = getReaderGroupConfig(streamCut0, streamCut1, stream);
 
         log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroupConfig1 :{} ",readerGroupConfig1);
 
-        groupManager.createReaderGroup(readerGroupName, readerGroupConfig1);
+        boolean readerGroupStatus1 = groupManager.createReaderGroup(readerGroupName, readerGroupConfig1);
 
-        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest reader group has created.");
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroupStatus1 :{}",readerGroupStatus1);
 
         @Cleanup
         ReaderGroup readerGroup = groupManager1.getReaderGroup(readerGroupName);
