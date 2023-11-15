@@ -300,11 +300,8 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
      */
     @Test(timeout = 90000)
     public void getNextStreamCutWithScaleDownTest() throws SegmentTruncatedException, ExecutionException, InterruptedException {
-       // String streamName = "testStreamSegmentScaleDown";
         String streamName = "testStreamName";
-        //String streamScope = "testScopeSegmentScaleDown";
         String streamScope = "testStreamScope";
-        //String readerGroupName = "testReaderGroupSegmentScaleDown";
         String readerGroupName = "testReaderGroupName";
         String readerName = UUID.randomUUID().toString();
         AtomicLong clock = new AtomicLong();
@@ -360,11 +357,11 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
 
         //TODO START
         log.info("***Amit to do starts****");
-        ReaderGroupManager groupManager1 = ReaderGroupManager.withScope("AmitScope", Utils.buildClientConfig(controllerURI));
+        ReaderGroupManager groupManager1 = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
         log.info("***Amit to do ReaderGroupManager groupManager1 :{}",groupManager1);
 
         boolean readerGroupStatus = groupManager1.createReaderGroup("AmitReaderGroupName",
-                ReaderGroupConfig.builder().stream(Stream.of("AmitScope", "AmitStreamName")).build());
+                ReaderGroupConfig.builder().stream(Stream.of(streamScope, streamName)).build());
         log.info("***Amit to do *****readerGroupStatus:{}***",readerGroupStatus);
 
         @Cleanup
