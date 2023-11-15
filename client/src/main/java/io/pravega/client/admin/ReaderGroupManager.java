@@ -32,6 +32,7 @@ import java.net.URI;
 /**
  * Used to create and manage reader groups.
  */
+
 public interface ReaderGroupManager extends AutoCloseable {
 
     /**
@@ -54,11 +55,14 @@ public interface ReaderGroupManager extends AutoCloseable {
      */
     static ReaderGroupManager withScope(String scope, ClientConfig clientConfig) {
         // Change the max number of number of allowed connections to the segment store to 1.
+        System.out.println("***Amit to do starts**withScope **");
         val updatedClientConfig = clientConfig.toBuilder()
                 .maxConnectionsPerSegmentStore(1)
                 .enableTlsToSegmentStore(clientConfig.isEnableTlsToSegmentStore())
                 .enableTlsToController(clientConfig.isEnableTlsToController())
                 .build();
+        System.out.println("***Amit to do starts**withScope *updatedClientConfig ::"+updatedClientConfig);
+        System.out.println("***Amit to do starts**withScope  end**");
         return new ReaderGroupManagerImpl(scope, updatedClientConfig, new SocketConnectionFactoryImpl(updatedClientConfig, 3));
     }
 

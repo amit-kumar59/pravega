@@ -300,9 +300,12 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
      */
     @Test(timeout = 90000)
     public void getNextStreamCutWithScaleDownTest() throws SegmentTruncatedException, ExecutionException, InterruptedException {
-        String streamName = "testStreamSegmentScaleDown";
-        String streamScope = "testScopeSegmentScaleDown";
-        String readerGroupName = "testReaderGroupSegmentScaleDown";
+       // String streamName = "testStreamSegmentScaleDown";
+        String streamName = "testStreamName";
+        //String streamScope = "testScopeSegmentScaleDown";
+        String streamScope = "testStreamScope";
+        //String readerGroupName = "testReaderGroupSegmentScaleDown";
+        String readerGroupName = "testReaderGroupName";
         String readerName = UUID.randomUUID().toString();
         AtomicLong clock = new AtomicLong();
         long approxDistanceToNextOffset = 180L;
@@ -356,20 +359,21 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         assertEquals(150L, streamCut1Position);
 
         //TODO START
-        ReaderGroupManager groupManager1 = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
-        log.info("*******SegmentReaderAPITest@getNextStreamCutWithScaleDownTest ReaderGroupManager groupManager1 ::{} streamScope::{} " +
-                "streamName::{}",groupManager1,streamScope,streamName);
+        log.info("***Amit to do starts****");
+        ReaderGroupManager groupManager1 = ReaderGroupManager.withScope("AmitScope", Utils.buildClientConfig(controllerURI));
+        log.info("***Amit to do ReaderGroupManager groupManager1 :{}",groupManager1);
 
-        groupManager1.createReaderGroup(readerGroupName, ReaderGroupConfig.builder().stream(Stream.of(streamScope, streamName)).build());
-        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest after reader group creation " +
-                "readerGroupName::{}",groupManager1.getReaderGroup("readerGroupName"));
+        boolean readerGroupStatus = groupManager1.createReaderGroup("AmitReaderGroupName",
+                ReaderGroupConfig.builder().stream(Stream.of("AmitScope", "AmitStreamName")).build());
+        log.info("***Amit to do *****readerGroupStatus:{}***",readerGroupStatus);
 
         @Cleanup
         EventStreamReader<String> reader11 = clientFactory.createReader(UUID.randomUUID().toString(),
-                readerGroupName,
+                "AmitReaderGroupName",
                 new JavaSerializer<>(),
                 ReaderConfig.builder().build());
-        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest reader11 ::{}",reader11);
+        log.info("****Amit to do ends** :reader11:{}",reader11);
+        log.info("***Amit to do ends****");
         //TODO END
 
         @Cleanup
@@ -383,7 +387,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest reader group has created.");
 
         @Cleanup
-        ReaderGroup readerGroup = groupManager.getReaderGroup(readerGroupName);
+        ReaderGroup readerGroup = groupManager1.getReaderGroup(readerGroupName);
 
         log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroup ::{}",readerGroup);
 
