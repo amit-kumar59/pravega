@@ -39,6 +39,7 @@ import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.stream.ReaderConfig;
 import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.impl.ClientFactoryImpl;
+import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.client.stream.impl.UTF8StringSerializer;
 import io.pravega.common.concurrent.ExecutorServiceHelpers;
 import io.pravega.common.hash.RandomFactory;
@@ -353,6 +354,23 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         long streamCut1Position = streamCut1.asImpl().getPositions().get(list.get(0)).longValue();
         log.info("Next stream cut1 {} streamCut1 position {}", streamCut1, streamCut1Position);
         assertEquals(150L, streamCut1Position);
+
+        //TODO START
+        ReaderGroupManager groupManager1 = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
+        log.info("*******SegmentReaderAPITest@getNextStreamCutWithScaleDownTest ReaderGroupManager groupManager1 ::{} streamScope::{} " +
+                "streamName::{}",groupManager1,streamScope,streamName);
+
+        groupManager1.createReaderGroup(readerGroupName, ReaderGroupConfig.builder().stream(Stream.of(streamScope, streamName)).build());
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest after reader group creation " +
+                "readerGroupName::{}",groupManager1.getReaderGroup("readerGroupName"));
+
+        @Cleanup
+        EventStreamReader<String> reader11 = clientFactory.createReader(UUID.randomUUID().toString(),
+                readerGroupName,
+                new JavaSerializer<>(),
+                ReaderConfig.builder().build());
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest reader11 ::{}",reader11);
+        //TODO END
 
         @Cleanup
         ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, controllerURI);
