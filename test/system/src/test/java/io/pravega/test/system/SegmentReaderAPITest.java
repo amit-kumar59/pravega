@@ -373,11 +373,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         log.info("****Amit to do ends** :reader11:{}", reader11);
         log.info("***Amit to do ends****");
         //TODO END
-
-        // @Cleanup
-        //ReaderGroupManager groupManager2 = ReaderGroupManager.withScope(streamScope, controllerURI);
-        //log.info("**********Amit groupManager2 :{}",groupManager2);
-
+        
         ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
         log.info("**********Amit groupManager :{}", groupManager);
 
@@ -390,7 +386,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroupStatus1 :{}", readerGroupStatus1);
 
         @Cleanup
-        ReaderGroup readerGroup = groupManager1.getReaderGroup(readerGroupName);
+        ReaderGroup readerGroup = groupManager.getReaderGroup(readerGroupName);
 
         log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroup ::{}", readerGroup);
 
