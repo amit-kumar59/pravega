@@ -230,9 +230,7 @@ public class RevisionedStreamClientImpl<T> implements RevisionedStreamClient<T> 
                 in.setOffset(offset.get());
                 try {
                     do {
-                        log.trace("***amit Iterator reading entry timeout {}", in.read(getReadTimeout()));
                         data = in.read(getReadTimeout());
-                        log.trace("***amit Iterator reading entry data {}", data);
                         if (data == null) {
                             log.warn("Timeout while attempting to read offset:{} on segment:{} where the endOffset is {}", offset, segment, endOffset);
                             in.setOffset(offset.get(), true);

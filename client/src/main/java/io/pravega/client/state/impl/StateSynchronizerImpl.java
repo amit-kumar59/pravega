@@ -83,13 +83,12 @@ public class StateSynchronizerImpl<StateT extends Revisioned>
     @Override
     public void fetchUpdates() {
         Revision revision = getRevisionToReadFrom(true);
-        log.info("Fetching updates after {} ", revision);
+        log.trace("Fetching updates after {} ", revision);
         try {
             val iter = client.readFrom(revision);
-            log.info("Amit Fetching updates after iter {} ", iter);
             while (iter.hasNext()) {
                 Entry<Revision, UpdateOrInit<StateT>> entry = iter.next();
-                log.info("Found entry {} ", entry.getValue());
+                log.trace("Found entry {} ", entry.getValue());
                 if (entry.getValue().isInit()) {
                     InitialUpdate<StateT> init = entry.getValue().getInit();
                     updateCurrentState(init.create(segment.getScopedStreamName(), entry.getKey()));
@@ -177,12 +176,10 @@ public class StateSynchronizerImpl<StateT extends Revisioned>
     @Override
     public void initialize(InitialUpdate<StateT> initial) {
         Revision result = client.writeConditionally(new RevisionImpl(segment, 0, 0), new UpdateOrInit<>(initial));
-        log.info("*****StateSynchronizerImpl@initialize result::{}",result);
         if (result == null) {
-            log.info("****if**Segment {} was already initialized", segment);
+            log.info("Segment {} was already initialized", segment);
             handleTruncation();
         } else {
-            log.info("**else***StateSynchronizerImpl@initialize scopeStreamName::{}",segment.getScopedStreamName());
             updateCurrentState(initial.create(segment.getScopedStreamName(), result));
         }
     }
@@ -264,12 +261,9 @@ public class StateSynchronizerImpl<StateT extends Revisioned>
 
     @Synchronized
     private void updateCurrentState(StateT newValue) {
-        log.info("***StateSynchronizerImpl@updteCUrrentState ::currentState::{}**",currentState);
-        log.info("***StateSynchronizerImpl@updteCUrrentState ::newVlaues::{}**",newValue);
         if (newValue != null && isNewer(newValue.getRevision())) {
             log.trace("Updating new state to {} ", newValue.getRevision());
             currentState = newValue;
-
         }
     }
 

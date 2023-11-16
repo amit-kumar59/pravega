@@ -39,6 +39,7 @@ import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.stream.ReaderConfig;
 import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.impl.ClientFactoryImpl;
+import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.client.stream.impl.UTF8StringSerializer;
 import io.pravega.common.concurrent.ExecutorServiceHelpers;
 import io.pravega.common.hash.RandomFactory;
@@ -299,9 +300,9 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
      */
     @Test(timeout = 90000)
     public void getNextStreamCutWithScaleDownTest() throws SegmentTruncatedException, ExecutionException, InterruptedException {
-        String streamName = "testStreamSegmentScaleDown";
-        String streamScope = "testScopeSegmentScaleDown";
-        String readerGroupName = "testReaderGroupSegmentScaleDown";
+        String streamName = "testStreamName";
+        String streamScope = "testStreamScope";
+        String readerGroupName = "testReaderGroupName";
         String readerName = UUID.randomUUID().toString();
         AtomicLong clock = new AtomicLong();
         long approxDistanceToNextOffset = 180L;
@@ -347,32 +348,52 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         // write events to stream 30 * 5  = 150 bytes
         writeEvents(5, writer);
         writer.flush();
-
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest 5 events written has completed. ");
         //Requested next stream cut at a distance of 180 bytes, and getting the next approx offset as a response.
         StreamCut streamCut1 = batchClient.getNextStreamCut(streamCut0, approxDistanceToNextOffset);
         long streamCut1Position = streamCut1.asImpl().getPositions().get(list.get(0)).longValue();
         log.info("Next stream cut1 {} streamCut1 position {}", streamCut1, streamCut1Position);
         assertEquals(150L, streamCut1Position);
 
+        //TODO START
+        log.info("***Amit to do starts****");
+        ReaderGroupManager groupManager1 = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
+        log.info("***Amit to do ReaderGroupManager groupManager1 :{}",groupManager1);
+
+        ReaderGroupConfig readerGroupConfig0 = ReaderGroupConfig.builder().stream(Stream.of(streamScope, streamName)).build();
+        log.info("***Amit to do *****readerGroupConfig0:{}***",readerGroupConfig0 );
+
+        boolean readerGroupStatus = groupManager1.createReaderGroup("AmitReaderGroupName", readerGroupConfig0);
+        log.info("***Amit to do *****readerGroupStatus:{}***",readerGroupStatus);
+
         @Cleanup
+        EventStreamReader<String> reader11 = clientFactory.createReader(UUID.randomUUID().toString(),
+                "AmitReaderGroupName",
+                new JavaSerializer<>(),
+                ReaderConfig.builder().build());
+        log.info("****Amit to do ends** :reader11:{}",reader11);
+        log.info("***Amit to do ends****");
+        //TODO END
+
+       /* @Cleanup
+        ReaderGroupManager groupManager2 = ReaderGroupManager.withScope(streamScope, controllerURI);
+        log.info("**********Amit groupManager2 :{}",groupManager2);*/
+
         ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
         log.info("**********Amit groupManager :{}",groupManager);
 
-        ReaderGroupConfig readerGroupConfig22 = getReaderGroupConfig(streamCut0, streamCut1, stream);
+        ReaderGroupConfig readerGroupConfig1 = getReaderGroupConfig(streamCut0, streamCut1, stream);
 
-        log.info("***Amit readerGroupConfig22 :{} ",readerGroupConfig22);
-
-        ReaderGroupConfig readerGroupConfig1 = ReaderGroupConfig.builder().stream(Stream.of(streamScope, streamName)).build();
-
-        log.info("***Amit readerGroupConfig1 :{} ",readerGroupConfig1);
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroupConfig1 :{} ",readerGroupConfig1);
 
         boolean readerGroupStatus1 = groupManager.createReaderGroup(readerGroupName, readerGroupConfig1);
-        log.info("***Amit readerGroupStatus1 :{} ",readerGroupStatus1);
+
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroupStatus1 :{}",readerGroupStatus1);
 
         @Cleanup
-        ReaderGroup readerGroup = groupManager.getReaderGroup(readerGroupName);
+        ReaderGroup readerGroup = groupManager1.getReaderGroup(readerGroupName);
 
-        log.info("***Amit readerGroup name :{}",readerGroup.getGroupName());
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest readerGroup ::{}",readerGroup);
 
         //Reading the events between the two streamCut, startStreamCut = streamCut0 and endStreamCut = streamCut1
         @Cleanup
@@ -380,6 +401,8 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 readerGroupName,
                 new UTF8StringSerializer(),
                 ReaderConfig.builder().build());
+
+        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest reader0 ::{}",reader0);
 
         int readCount1 = readEvent(reader0, streamCut1Position / 30);
         assertEquals(readCount1, streamCut1Position / 30);
