@@ -93,29 +93,13 @@ public class PravegaTest extends AbstractReadWriteTest {
 
         @Cleanup
         ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(Utils.buildClientConfig(controllerUri));
-
-        log.info("***PravegaTest@simpleTest before controller connection Factory {}", connectionFactory);
-
         @Cleanup
         ControllerImpl controller = new ControllerImpl(ControllerImplConfig.builder()
                                                                            .clientConfig(Utils.buildClientConfig(controllerUri))
                                                                            .build(), connectionFactory.getInternalExecutor());
 
-        log.info("***PravegaTest@simpleTest after controller connection Factory {}", connectionFactory);
-
-        ControllerImplConfig config1 = ControllerImplConfig.builder()
-                .clientConfig(Utils.buildClientConfig(controllerUri)).build();
-
-        log.info("***PravegaTest@simpleTest controller config :: {}", config1);
-        log.info("***PravegaTest@simpleTest before scope creation controller {}", controller);
-
         assertTrue(controller.createScope(STREAM_SCOPE).join());
-
-        log.info("***PravegaTest@simpleTest Stream_SCOPE{} creation has completed ", STREAM_SCOPE);
-
         assertTrue(controller.createStream(STREAM_SCOPE, STREAM_NAME, config).join());
-
-        log.info("***PravegaTest@simpleTest STREAM_NAME {} creation has completed ", STREAM_NAME);
 
         @Cleanup
         EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(STREAM_SCOPE, Utils.buildClientConfig(controllerUri));
@@ -125,50 +109,33 @@ public class PravegaTest extends AbstractReadWriteTest {
         EventStreamWriter<Serializable> writer = clientFactory.createEventWriter(STREAM_NAME,
                                                                                  new JavaSerializer<>(),
                                                                                  EventWriterConfig.builder().build());
-
-        log.info("***PravegaTest@simpleTest writer {} has created ", writer.getConfig().toString());
         for (int i = 0; i < NUM_EVENTS; i++) {
             String event = "Publish " + i + "\n";
-            //log.debug("Producing event: {} ", event);
-            log.info("***** Producing event: {} ", event);
+            log.debug("Producing event: {} ", event);
             // any exceptions while writing the event will fail the test.
             writer.writeEvent("", event);
             writer.flush();
         }
 
-        log.info("***PravegaTest@simpleTest written of event has completed.");
-
         log.info("Invoking Reader test.");
         ReaderGroupManager groupManager = ReaderGroupManager.withScope(STREAM_SCOPE, Utils.buildClientConfig(controllerUri));
-
-        log.info("***PravegaTest@simpleTest ReaderGroupManager  instance has created");
-
         groupManager.createReaderGroup(READER_GROUP, ReaderGroupConfig.builder().stream(Stream.of(STREAM_SCOPE, STREAM_NAME)).build());
-
-        log.info("***PravegaTest@simpleTest readerGroup ::{} has created", READER_GROUP);
-
         @Cleanup
         EventStreamReader<String> reader = clientFactory.createReader(UUID.randomUUID().toString(),
                                                                       READER_GROUP,
                                                                       new JavaSerializer<>(),
                                                                       ReaderConfig.builder().build());
-
-        log.info("***PravegaTest@simpleTest reader ::{} has created", reader.getConfig().toString());
         int readCount = 0;
 
         EventRead<String> event = null;
-        log.info("***PravegaTest@simpleTest reader is starting event reading ");
         do {
             event = reader.readNextEvent(10_000);
-            //log.debug("Read event: {}.", event.getEvent());
-            log.info("***PravegaTest@simpleTest read event :{}", event.getEvent());
+            log.debug("Read event: {}.", event.getEvent());
             if (event.getEvent() != null) {
                 readCount++;
             }
             // try reading until all the written events are read, else the test will timeout.
         } while ((event.getEvent() != null || event.isCheckpoint()) && readCount < NUM_EVENTS);
         assertEquals("Read count should be equal to write count", NUM_EVENTS, readCount);
-
-        log.info("***PravegaTest@simpleTest reader has finished event reading ");
     }
 }
