@@ -116,7 +116,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
      * Read the events between the streamCut and segment0 has scaled up(segment1, segment2) and written 5 events and validating the numbers of events written
      * by reading the events from the scaled up segment.
      */
-    //@Test(timeout = 120000)
+    @Test(timeout = 120000)
     public void getNextStreamCutWithScaleUpTest() throws SegmentTruncatedException, ExecutionException, InterruptedException {
         String streamName = "testStreamSegment";
         String streamScope = "testScopeSegment";
@@ -318,11 +318,6 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 connectionFactory.getInternalExecutor());
         Stream stream = Stream.of(streamScope, streamName);
 
-        ControllerImplConfig config = ControllerImplConfig.builder()
-                .clientConfig(Utils.buildClientConfig(controllerURI)).build();
-
-        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest controller config :: {}", config);
-
         @Cleanup
         ClientFactoryImpl clientFactory = new ClientFactoryImpl(streamScope, controller, connectionFactory);
         log.info("Invoking Writer test with Controller URI: {}", controllerURI);
@@ -347,7 +342,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         // write events to stream 30 * 5  = 150 bytes
         writeEvents(5, writer);
         writer.flush();
-        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest 5 events written has completed. ");
+
         //Requested next stream cut at a distance of 180 bytes, and getting the next approx offset as a response.
         StreamCut streamCut1 = batchClient.getNextStreamCut(streamCut0, approxDistanceToNextOffset);
         long streamCut1Position = streamCut1.asImpl().getPositions().get(list.get(0)).longValue();
@@ -373,7 +368,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         log.info("****Amit to do ends** :reader11:{}", reader11);
         log.info("***Amit to do ends****");
         //TODO END
-        
+
         ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
         log.info("**********Amit groupManager :{}", groupManager);
 
@@ -396,8 +391,6 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 readerGroupName,
                 new UTF8StringSerializer(),
                 ReaderConfig.builder().build());
-
-        log.info("***SegmentReaderAPITest@getNextStreamCutWithScaleDownTest reader0 ::{}", reader0);
 
         int readCount1 = readEvent(reader0, streamCut1Position / 30);
         assertEquals(readCount1, streamCut1Position / 30);
