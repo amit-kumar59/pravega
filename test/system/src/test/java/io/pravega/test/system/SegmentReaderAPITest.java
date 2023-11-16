@@ -358,9 +358,9 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
         log.info("**********Amit groupManager :{}",groupManager);
 
-        ReaderGroupConfig readerGroupConfig2 = getReaderGroupConfig(streamCut0, streamCut1, stream);
+        ReaderGroupConfig readerGroupConfig22 = getReaderGroupConfig(streamCut0, streamCut1, stream);
 
-        log.info("***Amit readerGroupConfig2 :{} ",readerGroupConfig2);
+        log.info("***Amit readerGroupConfig22 :{} ",readerGroupConfig22);
 
         ReaderGroupConfig readerGroupConfig1 = ReaderGroupConfig.builder().stream(Stream.of(streamScope, streamName)).build();
 
