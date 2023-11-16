@@ -255,39 +255,52 @@ public final class ReaderGroupImpl implements ReaderGroup, ReaderGroupMetrics {
     public void resetReaderGroup(ReaderGroupConfig config) {
         log.info("Reset ReaderGroup {} to {}", getGroupName(), config);
         synchronizer.fetchUpdates();
+        log.info("****Amit Reset ReaderGroup after fetch Updates {} to {}", getGroupName(), config);
         while (true) {
             val currentConfig = synchronizer.getState().getConfig();
+            log.info("****Amit Reset ReaderGroup currentConfig {}", currentConfig);
             // We only move into the block if the state transition has happened successfully.
             if (stateTransition(currentConfig, new UpdatingConfig(true))) {
+                log.info("****Amit Reset ReaderGroup if block1 ");
                 if (currentConfig.getReaderGroupId() == ReaderGroupConfig.DEFAULT_UUID
                         && currentConfig.getGeneration() == ReaderGroupConfig.DEFAULT_GENERATION) {
                     // Migration code path, for moving a ReaderGroup from version < 0.9 to 0.9+
+                    log.info("****Amit Reset ReaderGroup nested if block1 ");
                     final ReaderGroupConfig updateConfig = ReaderGroupConfig.cloneConfig(config, UUID.randomUUID(), 0L);
-
+                    log.info("****Amit Reset ReaderGroup nested if block1 updateConfig::{}",updateConfig);
                     final long nextGen = Futures.getThrowingException(controller.createReaderGroup(scope, getGroupName(), updateConfig)
                        .thenCompose(conf -> {
                        if (!conf.getReaderGroupId().equals(updateConfig.getReaderGroupId())) {
-                          return controller.updateReaderGroup(scope, groupName,
+                           log.info("****Amit Reset ReaderGroup nested if block111 ");
+                           return controller.updateReaderGroup(scope, groupName,
                                   ReaderGroupConfig.cloneConfig(updateConfig, conf.getReaderGroupId(), conf.getGeneration()));
                         } else {
                           // ReaderGroup IDs matched so our create was updated on Controller
-                          return CompletableFuture.completedFuture(conf.getGeneration());
+                           log.info("****Amit Reset ReaderGroup nested if else block1 ");
+                           return CompletableFuture.completedFuture(conf.getGeneration());
                        }
                        }));
+                    log.info("****Amit Reset ReaderGroup before1 updateConfigInStateSynchronizer ");
                     updateConfigInStateSynchronizer(updateConfig, nextGen);
+                    log.info("****Amit Reset ReaderGroup after1 updateConfigInStateSynchronizer ");
                 } else {
                     // normal code path
                     // Use the latest generation and reader group Id.
                     ReaderGroupConfig newConfig = ReaderGroupConfig.cloneConfig(config,
                                     currentConfig.getReaderGroupId(), currentConfig.getGeneration());
+                    log.info("****Amit Reset ReaderGroup else  newConfig::{}",newConfig);
                     long newGen = Futures.exceptionallyExpecting(controller.updateReaderGroup(scope, groupName, newConfig),
                             e -> Exceptions.unwrap(e) instanceof ReaderGroupConfigRejectedException, -1L).join();
+
+                    log.info("****Amit Reset ReaderGroup else  newGen::{}",newGen);
                     if (newGen == -1) {
-                        log.debug("Synchronize reader group with the one present on controller.");
+                        log.info("Synchronize reader group with the one present on controller.");
                         synchronizeReaderGroupConfig();
                         continue;
                     }
+                    log.info("****Amit Reset ReaderGroup before2 updateConfigInStateSynchronizer ");
                     updateConfigInStateSynchronizer(newConfig, newGen);
+                    log.info("****Amit Reset ReaderGroup after2 updateConfigInStateSynchronizer ");
                 }
                 return;
             }
@@ -296,22 +309,29 @@ public final class ReaderGroupImpl implements ReaderGroup, ReaderGroupMetrics {
     }
 
     private void updateConfigInStateSynchronizer(ReaderGroupConfig config, long newGen) {
+        log.info("******Amit ReaderGroupIMpl config::{} newGen::{}",config,newGen);
         Map<SegmentWithRange, Long> segments = getSegmentsForStreams(controller, config);
+        log.info("******Amit ReaderGroupIMpl segments::{}",segments);
         synchronizer.updateState((s, updates) -> {
             updates.add(new ReaderGroupStateInit(ReaderGroupConfig.cloneConfig(config,
                     config.getReaderGroupId(), newGen), segments, getEndSegmentsForStreams(config), false));
         });
+        log.info("******Amit ReaderGroupIMpl segments:reached end of this function:{}",segments);
+
     }
 
     private void synchronizeReaderGroupConfig() {
         ReaderGroupConfig controllerConfig = getThrowingException(controller.getReaderGroupConfig(scope, groupName));
+        log.info("******Amit ReaderGroupIMpl@synchronizeReaderGroupConfig controllerConfig::{}",controllerConfig);
         Map<SegmentWithRange, Long> segments = getSegmentsForStreams(controller, controllerConfig);
+        log.info("******Amit ReaderGroupIMpl@synchronizeReaderGroupConfig segments::{}",segments);
         synchronizer.updateState((s, updates) -> {
             if (s.getConfig().getGeneration() < controllerConfig.getGeneration()) {
                 updates.add(new ReaderGroupState.ReaderGroupStateInit(controllerConfig, segments, getEndSegmentsForStreams(controllerConfig), false));
             }
 
         });
+        log.info("******Amit ReaderGroupIMpl@synchronizeReaderGroupConfig end");
     }
 
     private boolean stateTransition(ReaderGroupConfig config, ReaderGroupState.ReaderGroupStateUpdate update) {

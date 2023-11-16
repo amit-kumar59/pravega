@@ -76,8 +76,10 @@ class EventSegmentReaderImpl implements EventSegmentReader {
         long traceId = LoggerHelpers.traceEnter(log, "read", in.getSegmentId(), originalOffset, firstByteTimeoutMillis);
         boolean success = false;
         boolean timeout = false;
+        log.warn("*****amit read originalOffset:{} traceId::{}",originalOffset,traceId);
         try {
             ByteBuffer result = readEvent(firstByteTimeoutMillis);
+            log.warn("*****amit read result:{}", result);
             success = true;
             return result;
         } catch (TimeoutException e) {
@@ -97,6 +99,7 @@ class EventSegmentReaderImpl implements EventSegmentReader {
     private ByteBuffer readEvent(long firstByteTimeoutMillis) throws EndOfSegmentException, SegmentTruncatedException, TimeoutException {
         headerReadingBuffer.clear();
         int read = in.read(headerReadingBuffer, firstByteTimeoutMillis);
+        log.info("AMit read event ::read : {}.",read);
         if (read == 0) {
             log.debug("Empty read for segment id {}.", in.getSegmentId());
             // a resend will not be triggered in-case of a firstByteTimeout.
