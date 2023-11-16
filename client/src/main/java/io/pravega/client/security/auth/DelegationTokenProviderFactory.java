@@ -22,10 +22,10 @@ import io.pravega.shared.security.auth.AccessOperation;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 /**
  * Factory class for {@link DelegationTokenProvider} instances.
  */
+@Slf4j
 public class DelegationTokenProviderFactory {
 
     /**
@@ -96,8 +96,8 @@ public class DelegationTokenProviderFactory {
      */
     public static DelegationTokenProvider create(String delegationToken, Controller controller, String scopeName,
                                                  String streamName, AccessOperation accessOperation) {
-        log.info("********DelegationTokenProviderFactory@create ::delegationToken:{}**controller::{}***",delegationToken,controller);
-        log.info("********DelegationTokenProviderFactory@create ::scopeName:{}**streamName::{}***accessOperation::{}",scopeName,streamName,accessOperation);
+        log.info("********DelegationTokenProviderFactory@create ::delegationToken:{}**controller::{}***", delegationToken, controller);
+        log.info("********DelegationTokenProviderFactory@create ::scopeName:{}**streamName::{}***accessOperation::{}", scopeName, streamName, accessOperation);
         if (delegationToken == null) {
             log.info("********DelegationTokenProviderFactory@create if1 :");
             return new JwtTokenProviderImpl(controller, scopeName, streamName, accessOperation);

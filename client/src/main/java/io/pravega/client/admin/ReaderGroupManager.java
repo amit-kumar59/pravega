@@ -61,7 +61,7 @@ public interface ReaderGroupManager extends AutoCloseable {
                 .enableTlsToSegmentStore(clientConfig.isEnableTlsToSegmentStore())
                 .enableTlsToController(clientConfig.isEnableTlsToController())
                 .build();
-        System.out.println("***Amit to do starts**withScope *updatedClientConfig ::"+updatedClientConfig);
+        System.out.println("***Amit to do starts**withScope *updatedClientConfig ::" + updatedClientConfig);
         System.out.println("***Amit to do starts**withScope  end**");
         return new ReaderGroupManagerImpl(scope, updatedClientConfig, new SocketConnectionFactoryImpl(updatedClientConfig, 3));
     }

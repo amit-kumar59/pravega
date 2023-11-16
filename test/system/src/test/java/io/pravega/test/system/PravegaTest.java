@@ -15,7 +15,6 @@
  */
 package io.pravega.test.system;
 
-import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.connection.impl.ConnectionFactory;
@@ -107,7 +106,7 @@ public class PravegaTest extends AbstractReadWriteTest {
         ControllerImplConfig config1 = ControllerImplConfig.builder()
                 .clientConfig(Utils.buildClientConfig(controllerUri)).build();
 
-        log.info("***PravegaTest@simpleTest controller config :: {}",config1);
+        log.info("***PravegaTest@simpleTest controller config :: {}", config1);
         log.info("***PravegaTest@simpleTest before scope creation controller {}", controller);
 
         assertTrue(controller.createScope(STREAM_SCOPE).join());
@@ -162,7 +161,7 @@ public class PravegaTest extends AbstractReadWriteTest {
         do {
             event = reader.readNextEvent(10_000);
             //log.debug("Read event: {}.", event.getEvent());
-            log.info("***PravegaTest@simpleTest read event :{}",event.getEvent());
+            log.info("***PravegaTest@simpleTest read event :{}", event.getEvent());
             if (event.getEvent() != null) {
                 readCount++;
             }

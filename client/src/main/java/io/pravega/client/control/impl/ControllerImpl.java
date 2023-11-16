@@ -370,7 +370,7 @@ public class ControllerImpl implements Controller {
         final long requestId = requestIdGenerator.get();
         long traceId = LoggerHelpers.traceEnter(log, "createScope", scopeName, requestId);
 
-        log.info("***COntrollerImpl@createScope request id : {} traceid ::{}", requestId , traceId);
+        log.info("***COntrollerImpl@createScope request id : {} traceid ::{}", requestId, traceId);
 
         final CompletableFuture<CreateScopeStatus> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<CreateScopeStatus> callback = new RPCAsyncCallback<>(requestId, "createScope", scopeName);
@@ -631,7 +631,7 @@ public class ControllerImpl implements Controller {
         final long requestId = requestIdGenerator.get();
         long traceId = LoggerHelpers.traceEnter(log, "createStream", streamConfig, requestId);
 
-        log.info("***ControllerImple@CreateStream requestId:: {} traceId::{}", requestId,traceId);
+        log.info("***ControllerImple@CreateStream requestId:: {} traceId::{}", requestId, traceId);
 
         final CompletableFuture<CreateStreamStatus> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<CreateStreamStatus> callback = new RPCAsyncCallback<>(requestId, 
@@ -1948,31 +1948,30 @@ public class ControllerImpl implements Controller {
         Exceptions.checkNotNullOrEmpty(rgName, "rgName");
         log.info("****controllerIMpl@createReaderGroup 3");
 
-
         Preconditions.checkNotNull(rgConfig, "rgConfig");
         log.info("****controllerIMpl@createReaderGroup 4");
 
         final long requestId = requestIdGenerator.get();
         long traceId = LoggerHelpers.traceEnter(log, "createReaderGroup", rgConfig, requestId);
 
-        log.info("****controllerIMpl@createReaderGroup requestId::{} traceId::{}",requestId,traceId);
+        log.info("****controllerIMpl@createReaderGroup requestId::{} traceId::{}", requestId, traceId);
 
         final CompletableFuture<CreateReaderGroupResponse> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<CreateReaderGroupResponse> callback = new RPCAsyncCallback<>(requestId, 
                     "createReaderGroup", scope, rgName, rgConfig);
 
-            log.info("****controllerIMpl@createReaderGroup callback result::{}",callback.result);
+            log.info("****controllerIMpl@createReaderGroup callback result::{}", callback.result);
 
             new ControllerClientTagger(client, timeoutMillis).withTag(requestId, CREATE_READER_GROUP, scope, rgName)
                     .createReaderGroup(ModelHelper.decode(scope, rgName, rgConfig), callback);
             return callback.getFuture();
         }, this.executor);
 
-        log.info("****controllerIMpl@createReaderGroup result::{}",result);
+        log.info("****controllerIMpl@createReaderGroup result::{}", result);
 
         return result.thenApplyAsync(x -> {
             final String rgScopedName = NameUtils.getScopedReaderGroupName(scope, rgName);
-            log.info("****controllerIMpl@createReaderGroup rgScopedName::{}",rgScopedName);
+            log.info("****controllerIMpl@createReaderGroup rgScopedName::{}", rgScopedName);
             switch (x.getStatus()) {
                 case FAILURE:
                     log.warn(requestId, "Failed to create Reader Group: {}", rgScopedName);
@@ -2319,8 +2318,8 @@ public class ControllerImpl implements Controller {
         }
 
         void createReaderGroup(ReaderGroupConfiguration rgConfig, RPCAsyncCallback<CreateReaderGroupResponse> callback) {
-            log.info("***ControllerImpl@createReaderGroup 111 ::rgconfig::{}",rgConfig);
-            log.info("***ControllerImpl@createReaderGroup 222 ::callback::{}",callback);
+            log.info("***ControllerImpl@createReaderGroup 111 ::rgconfig::{}", rgConfig);
+            log.info("***ControllerImpl@createReaderGroup 222 ::callback::{}", callback);
             clientStub.withDeadlineAfter(timeoutMillis, TimeUnit.MILLISECONDS)
                     .createReaderGroup(rgConfig, callback);
         }

@@ -84,13 +84,13 @@ public class PravegaControllerK8sService extends AbstractService {
         //fetch the URI.
         String prefix = Utils.TLS_AND_AUTH_ENABLED ? TLS : TCP;
         String tlsCname = Utils.getConfig("tlsCertCNName", "pravega");
-        log.info("Tls enabled status :{} auth enabled status :{} tls cname :{}" ,Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED, tlsCname);
+        log.info("Tls enabled status :{} auth enabled status :{} tls cname :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED, tlsCname);
 
         return Futures.getAndHandleExceptions(k8sClient.getStatusOfPodWithLabel(NAMESPACE, "component", PRAVEGA_CONTROLLER_LABEL)
-                                                       .thenApply(statuses -> statuses.stream()
-                                                                                     .flatMap(s -> Stream.of(URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? tlsCname : s.getPodIP()) + ":" + CONTROLLER_GRPC_PORT),
-                                                                                                             URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? tlsCname : s.getPodIP()) + ":" + CONTROLLER_REST_PORT)))
-                                                                                     .collect(Collectors.toList())),
+                       .thenApply(statuses -> statuses.stream()
+                  .flatMap(s -> Stream.of(URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? tlsCname : s.getPodIP()) + ":" + CONTROLLER_GRPC_PORT),
+                                          URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? tlsCname : s.getPodIP()) + ":" + CONTROLLER_REST_PORT)))
+                     .collect(Collectors.toList())),
                                               t -> new TestFrameworkException(RequestFailed, "Failed to fetch ServiceDetails for pravega-controller", t));
     }
 

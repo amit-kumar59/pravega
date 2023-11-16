@@ -243,7 +243,7 @@ public final class ClientFactoryImpl extends AbstractClientFactoryImpl implement
 
     private <T> RevisionedStreamClient<T> createRevisionedStreamClient(Segment segment, Serializer<T> serializer,
                                                                        SynchronizerConfig config) {
-        log.info("*******ClientFactoryImpl@createRevisionedStreamClient*****config :{} getEventWriter config ::{}", config , config.getEventWriterConfig());
+        log.info("*******ClientFactoryImpl@createRevisionedStreamClient*****config :{} getEventWriter config ::{}", config, config.getEventWriterConfig());
         EventSegmentReader in = inFactory.createEventReaderForSegment(segment, config.getReadBufferSize());
 
         log.info("*******ClientFactoryImpl@createRevisionedStreamClient*****in :{}", in);

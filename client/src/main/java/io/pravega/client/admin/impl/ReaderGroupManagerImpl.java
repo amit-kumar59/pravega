@@ -94,14 +94,14 @@ public class ReaderGroupManagerImpl implements ReaderGroupManager {
         log.info("Creating reader group: {} for streams: {} with configuration: {}", groupName,
                 Arrays.toString(config.getStartingStreamCuts().keySet().toArray()), config);
         NameUtils.validateReaderGroupName(groupName);
-        log.info("*****CreateReaderGroup**After after validation ReaderGroupId:{} default uuid :{}",config.getReaderGroupId(),ReaderGroupConfig.DEFAULT_UUID);
+        log.info("*****CreateReaderGroup**After after validation ReaderGroupId:{} default uuid :{}", config.getReaderGroupId(), ReaderGroupConfig.DEFAULT_UUID);
         if (config.getReaderGroupId() == ReaderGroupConfig.DEFAULT_UUID) {
             log.info("*****CreateReaderGroup**After if block ");
             // make sure we never attempt to create a ReaderGroup with default ReadrGroupId which is 0-0-0
             config = ReaderGroupConfig.cloneConfig(config, UUID.randomUUID(), 0L);
-            log.info("*****CreateReaderGroup**After if block  ReaderGroupConfig::{}",config);
+            log.info("*****CreateReaderGroup**After if block  ReaderGroupConfig::{}", config);
         }
-        log.info("*****CreateReaderGroup**After after if  scope::{}",scope);
+        log.info("*****CreateReaderGroup**After after if  scope::{}", scope);
         ReaderGroupConfig controllerConfig = getThrowingException(controller.createReaderGroup(scope, groupName, config));
         if (!controllerConfig.equals(config)) {
             log.info("***ReaderGroup {} if already exists with pre-existing configuration {}", groupName, controllerConfig);
@@ -110,21 +110,21 @@ public class ReaderGroupManagerImpl implements ReaderGroupManager {
             log.info("ReaderGroup {} already exists : else if", groupName);
             return false;
         } else {
-            log.info("*****CreateReaderGroup**After after else  scope::{}",scope);
+            log.info("*****CreateReaderGroup**After after else  scope::{}", scope);
             @Cleanup
             StateSynchronizer<ReaderGroupState> synchronizer = clientFactory.createStateSynchronizer(NameUtils.getStreamForReaderGroup(groupName),
                                                                                                      new ReaderGroupStateUpdatesSerializer(), 
                                                                                                      new ReaderGroupStateInitSerializer(), 
                                                                                                      SynchronizerConfig.builder().build());
-            log.info("*****CreateReaderGroup** else block  synchronizer::{}",synchronizer.getState());
+            log.info("*****CreateReaderGroup** else block  synchronizer::{}", synchronizer.getState());
 
             Map<SegmentWithRange, Long> segments = ReaderGroupImpl.getSegmentsForStreams(controller, controllerConfig);
 
-            log.info("*****CreateReaderGroup** else block  segments::{}",segments);
+            log.info("*****CreateReaderGroup** else block  segments::{}", segments);
 
             Map<Segment, Long>  endSegmentsForStreams = getEndSegmentsForStreams(controllerConfig);
 
-            log.info("*****CreateReaderGroup** else block  endSegmentsForStreams::{}",endSegmentsForStreams);
+            log.info("*****CreateReaderGroup** else block  endSegmentsForStreams::{}", endSegmentsForStreams);
 
             synchronizer.initialize(new ReaderGroupState.ReaderGroupStateInit(controllerConfig, segments, getEndSegmentsForStreams(controllerConfig), false));
             log.info("********* CreateReaderGroup else block After initialization *and returning true************");

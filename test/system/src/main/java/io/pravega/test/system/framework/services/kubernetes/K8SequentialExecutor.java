@@ -54,8 +54,6 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang.RandomStringUtils.randomAlphanumeric;
 import static io.pravega.test.system.framework.TestFrameworkException.Type.RequestFailed;
 import io.kubernetes.client.openapi.models.V1HostAlias;
-import java.net.URI;
-import java.util.List;
 
 @Slf4j
 public class K8SequentialExecutor implements TestExecutor {
@@ -160,13 +158,13 @@ public class K8SequentialExecutor implements TestExecutor {
                 .restartPolicy("Never"));
         if (Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) {
 
-            List<URI> IPs =Futures.getAndHandleExceptions(client.getStatusOfPodWithLabel(NAMESPACE, "component", "pravega-controller")
+            List<URI> ips = Futures.getAndHandleExceptions(client.getStatusOfPodWithLabel(NAMESPACE, "component", "pravega-controller")
                             .thenApply(statuses -> statuses.stream()
-                                    .flatMap(s -> Stream.of(URI.create( s.getPodIP() )))
+                                    .flatMap(s -> Stream.of(URI.create(s.getPodIP())))
                                     .collect(Collectors.toList())),
                     t -> new TestFrameworkException(RequestFailed, "Failed to fetch ServiceDetails for pravega-controller", t));
 
-            log.info("********K8SequentialExecutor@getTestpos IPS ::{} IP ::{}", IPs, IPs.get(0).toString());
+            log.info("********K8SequentialExecutor@getTestpos IPS ::{} IP ::{}", ips, ips.get(0).toString());
 
             List<V1Volume> volumes = new ArrayList<>(pod.getSpec().getVolumes());
             volumes.add(new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().defaultMode(420).secretName(Utils.TLS_SECRET_NAME)));
@@ -174,16 +172,15 @@ public class K8SequentialExecutor implements TestExecutor {
 
             log.info("********K8SequentialExecutor@getTestpos get volume spec ::{} ", pod.getSpec().getVolumes());
 
-            List<V1HostAlias> hostAliaseList =pod.getSpec().getHostAliases();
-            if(hostAliaseList == null){
-                hostAliaseList  =  new ArrayList<>();
+            List<V1HostAlias> hostAliaseList = pod.getSpec().getHostAliases();
+            if (hostAliaseList == null) {
+                hostAliaseList = new ArrayList<>();
             }
 
             String tlscnname = Utils.getConfig("tlsCertCNName", "pravega");
-            log.info("************tlscnname ::{}",tlscnname);
+            log.info("************tlscnname ::{}", tlscnname);
 
-
-            hostAliaseList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(IPs.get(0).toString()));
+            hostAliaseList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ips.get(0).toString()));
             pod.getSpec().setHostAliases(hostAliaseList);
 
             log.info("********K8SequentialExecutor@getTestpos Alliase  ::{} ", pod.getSpec().getHostAliases());
@@ -193,7 +190,7 @@ public class K8SequentialExecutor implements TestExecutor {
             pod.getSpec().getContainers().get(0).setVolumeMounts(volumeMounts);
 
             log.info("********K8SequentialExecutor@getTestpos VolumeMounts  ::{} ", pod.getSpec().getContainers().get(0).getVolumeMounts());
-            log.info("********K8SequentialExecutor@getTestpos **end of host name added pod->{} ",pod);
+            log.info("********K8SequentialExecutor@getTestpos **end of host name added pod->{} ", pod);
         }
         return pod;
     }
