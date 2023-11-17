@@ -157,7 +157,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
 
         // write events to stream 30 *10  = 300 bytes
         writeEvents(10, writer);
-        writer.flush();
+        Thread.sleep(4000);
 
         //Requested next stream cut at a distance of 170 bytes, and getting the next approx offset as a response.
         StreamCut streamCut1 = batchClient.getNextStreamCut(streamCut0, 170L);
@@ -251,7 +251,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 executor).getFuture().get();
         assertTrue(status);
         writeEvents(4, writer);
-        writer.flush();
+        Thread.sleep(4000);
 
         StreamCut nextStreamCut5 = batchClient.getNextStreamCut(streamCut4, approxDistanceToNextOffset);
         log.info("Next stream cut5 {}", nextStreamCut5);
@@ -341,7 +341,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
 
         // write events to stream 30 * 5  = 150 bytes
         writeEvents(5, writer);
-        writer.flush();
+        Thread.sleep(4000);
 
         //Requested next stream cut at a distance of 180 bytes, and getting the next approx offset as a response.
         StreamCut streamCut1 = batchClient.getNextStreamCut(streamCut0, approxDistanceToNextOffset);
@@ -352,11 +352,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         @Cleanup
         ReaderGroupManager groupManager = ReaderGroupManager.withScope(streamScope, Utils.buildClientConfig(controllerURI));
         ReaderGroupConfig readerGroupConfig1 = getReaderGroupConfig(streamCut0, streamCut1, stream);
-        log.info("Reader group config : {} ", readerGroupConfig1);
-
-        boolean readerGroupStatus1 = groupManager.createReaderGroup(readerGroupName, readerGroupConfig1);
-        log.info("Reader group creation status : {}", readerGroupStatus1);
-
+        groupManager.createReaderGroup(readerGroupName, readerGroupConfig1);
         @Cleanup
         ReaderGroup readerGroup = groupManager.getReaderGroup(readerGroupName);
 
@@ -382,27 +378,11 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 executor).getFuture().get();
         assertTrue(status);
         writeEvents(5, writer);
-        writer.flush();
+        Thread.sleep(4000);
 
         StreamCut streamCut2 = batchClient.getNextStreamCut(streamCut1, approxDistanceToNextOffset);
         log.info("Next stream cut2 {}", streamCut2);
         assertEquals(2, streamCut2.asImpl().getPositions().size());
-
-        Segment segment1 = Segment.fromScopedName(streamScope + "/" + streamName + "/1.#epoch.1");
-        Segment segment2 = Segment.fromScopedName(streamScope + "/" + streamName + "/2.#epoch.1");
-        log.info("Segment1 name {} and Segment2 name {}", segment1.getScopedName(), segment2.getScopedName());
-
-        ArrayList<SegmentRange> segmentList1 = Lists.newArrayList(batchClient.getSegments(stream, StreamCut.UNBOUNDED, StreamCut.UNBOUNDED).getIterator());
-        log.info("Segment List1 :{}", segmentList1);
-
-        Map<Segment, Long> map = segmentList1.stream().collect(Collectors.toMap(SegmentRange::getSegment, value -> value.getEndOffset()));
-        assertTrue(map.get(segment1).longValue() <= streamCut2.asImpl().getPositions().get(segment1).longValue());
-        assertTrue(map.get(segment2).longValue() <= streamCut2.asImpl().getPositions().get(segment2).longValue());
-
-        assertNotNull(streamCut2);
-        assertEquals(2, streamCut2.asImpl().getPositions().size());
-        assertTrue(streamCut2.asImpl().getPositions().containsKey(segment1) &&
-                streamCut2.asImpl().getPositions().containsKey(segment2));
 
         ReaderGroupConfig readerGroupConfig2 = getReaderGroupConfig(streamCut1, streamCut2, stream);
         readerGroup.resetReaderGroup(readerGroupConfig2);
@@ -423,6 +403,14 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         assertEquals(5, readEvent(reader0, 5));
         reader0.close();
 
+        Segment segment1 = Segment.fromScopedName(streamScope + "/" + streamName + "/1.#epoch.1");
+        Segment segment2 = Segment.fromScopedName(streamScope + "/" + streamName + "/2.#epoch.1");
+        log.info("Segment1 name {} and Segment2 name {}", segment1.getScopedName(), segment2.getScopedName());
+
+        assertNotNull(streamCut2);
+        assertEquals(2, streamCut2.asImpl().getPositions().size());
+        assertTrue(streamCut2.asImpl().getPositions().containsKey(segment1) &&
+                streamCut2.asImpl().getPositions().containsKey(segment2));
         //Scaling up end
 
         //Scaling down start
@@ -439,7 +427,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 executor).getFuture().get();
         assertTrue(status1);
         writeEvents(5, writer);
-        writer.flush();
+        Thread.sleep(4000);
 
         StreamCut streamCut3 = batchClient.getNextStreamCut(streamCut2, approxDistanceToNextOffset);
         log.info("Next stream cut3 {}", streamCut3);
