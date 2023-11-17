@@ -24,11 +24,9 @@ import io.pravega.common.MathHelpers;
 import io.pravega.shared.security.auth.AccessOperation;
 import java.util.concurrent.Semaphore;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @VisibleForTesting
 @RequiredArgsConstructor
-@Slf4j
 public class SegmentInputStreamFactoryImpl implements SegmentInputStreamFactory {
 
     private final Controller controller;
@@ -60,21 +58,11 @@ public class SegmentInputStreamFactoryImpl implements SegmentInputStreamFactory 
     }
 
     private EventSegmentReader getEventSegmentReader(Segment segment, Semaphore hasData, long startOffset, long endOffset, int bufferSize) {
-
-        log.info("******SegmentInputStreamFactoryImpl@getEventSegmentReader segment: {}**hasData::{}**startOffset:" +
-                "{}**endOffset::{}**bufferSize:{}", segment, hasData, startOffset, endOffset, bufferSize);
-
         DelegationTokenProvider tokenProvider = DelegationTokenProviderFactory.create(controller, segment, AccessOperation.READ);
-        log.info("******SegmentInputStreamFactoryImpl@getEventSegmentReader tokenProvider::{}", tokenProvider.retrieveToken());
         tokenProvider.retrieveToken();
         AsyncSegmentInputStreamImpl async = new AsyncSegmentInputStreamImpl(controller, cp, segment, tokenProvider, hasData);
-        log.info("******SegmentInputStreamFactoryImpl@getEventSegmentReader async::{}", async);
         async.getConnection();                      //Sanity enforcement
         bufferSize = MathHelpers.minMax(bufferSize, SegmentInputStreamImpl.MIN_BUFFER_SIZE, SegmentInputStreamImpl.MAX_BUFFER_SIZE);
-        log.info("******SegmentInputStreamFactoryImpl@getEventSegmentReader bufferSize::{}", bufferSize);
-
-        EventSegmentReaderImpl eventSegmentReader = getEventSegmentReader(async, startOffset, endOffset, bufferSize);
-        log.info("******SegmentInputStreamFactoryImpl@getEventSegmentReader eventSegmentReader::{}", eventSegmentReader);
         return getEventSegmentReader(async, startOffset, endOffset, bufferSize);
     }
 
