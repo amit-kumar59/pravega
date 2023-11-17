@@ -31,19 +31,18 @@ echo "Tls enabled status : $tlsEnabled"
 echo "Security auth enable status : $securityEnabled"
 
 # Delete secret if it exists
-if [ "$tlsEnabled" == "true" ] && [ "$securityEnabled" == "true" ]; then
-    # Delete existing secrets
-    # Loop through and delete each secret if it exists
-    for secret in "${secrets_to_delete[@]}"; do
-        kubectl get secret $secret &> /dev/null
-        if [ $? -eq 0 ]; then
-            echo "Deleting existing secret $secret"
-            kubectl delete secret $secret
-        else
-            echo "Secret $secret does not exist, skipping deletion"
-        fi
-    done
-fi
+
+# Delete existing secrets
+# Loop through and delete each secret if it exists
+for secret in "${secrets_to_delete[@]}"; do
+    kubectl get secret $secret &> /dev/null
+    if [ $? -eq 0 ]; then
+        echo "Deleting existing secret $secret"
+        kubectl delete secret $secret
+    else
+        echo "Secret $secret does not exist, skipping deletion"
+    fi
+done
 
 CERTIFICATE_PATH=$(pwd)/src/test/resources
 echo "Certificates path : $CERTIFICATE_PATH"
@@ -62,34 +61,36 @@ SEGMENT_STORE_JKS_FILE="$CERTIFICATE_PATH/segmentstore01.jks"
 TLS_CRT="$CERTIFICATE_PATH/tls.crt"
 PASS_SECRET="$CERTIFICATE_PATH/pass-secret-tls"
 
-# Create the controller-tls secret
-kubectl create secret generic $CONTROLLER_SECRET_NAME \
-  --namespace=$NAMESPACE \
-  --from-file=$CONTROLLER_PEM_FILE \
-  --from-file=$TLS_CRT \
-  --from-file=$CONTROLLER_KEY_PEM \
-  --from-file=$CONTROLLER_JKS_FILE \
-  --from-file=$PASS_SECRET
+if [ "$tlsEnabled" == "true" ] && [ "$securityEnabled" == "true" ]; then
+  # Create the controller-tls secret
+  kubectl create secret generic $CONTROLLER_SECRET_NAME \
+    --namespace=$NAMESPACE \
+    --from-file=$CONTROLLER_PEM_FILE \
+    --from-file=$TLS_CRT \
+    --from-file=$CONTROLLER_KEY_PEM \
+    --from-file=$CONTROLLER_JKS_FILE \
+    --from-file=$PASS_SECRET
 
-# Checking if the controller-tls secret creation was successful
-if [ $? -eq 0 ]; then
-  echo "Kubernetes secret '$CONTROLLER_SECRET_NAME' created successfully in namespace '$NAMESPACE'."
-else
-  echo "Error creating Kubernetes secret '$CONTROLLER_SECRET_NAME' in namespace '$NAMESPACE'."
-fi
+  # Checking if the controller-tls secret creation was successful
+  if [ $? -eq 0 ]; then
+    echo "Kubernetes secret '$CONTROLLER_SECRET_NAME' created successfully in namespace '$NAMESPACE'."
+  else
+    echo "Error creating Kubernetes secret '$CONTROLLER_SECRET_NAME' in namespace '$NAMESPACE'."
+  fi
 
-# Create the segment store-tls secret
-kubectl create secret generic $SEGMENT_STORE_SECRET_NAME \
-  --namespace=$NAMESPACE \
-  --from-file=$SEGMENT_STORE_PEM_FILE \
-  --from-file=$TLS_CRT \
-  --from-file=$SEGMENT_STORE_KEY_PEM \
-  --from-file=$SEGMENT_STORE_JKS_FILE \
-  --from-file=$PASS_SECRET
+  # Create the segment store-tls secret
+  kubectl create secret generic $SEGMENT_STORE_SECRET_NAME \
+    --namespace=$NAMESPACE \
+    --from-file=$SEGMENT_STORE_PEM_FILE \
+    --from-file=$TLS_CRT \
+    --from-file=$SEGMENT_STORE_KEY_PEM \
+    --from-file=$SEGMENT_STORE_JKS_FILE \
+    --from-file=$PASS_SECRET
 
-# Checking if the segment store-tls secret creation was successful
-if [ $? -eq 0 ]; then
-  echo "Kubernetes secret '$SEGMENT_STORE_SECRET_NAME' created successfully in namespace '$NAMESPACE'."
-else
-  echo "Error creating Kubernetes secret '$SEGMENT_STORE_SECRET_NAME' in namespace '$NAMESPACE'."
+  # Checking if the segment store-tls secret creation was successful
+  if [ $? -eq 0 ]; then
+    echo "Kubernetes secret '$SEGMENT_STORE_SECRET_NAME' created successfully in namespace '$NAMESPACE'."
+  else
+    echo "Error creating Kubernetes secret '$SEGMENT_STORE_SECRET_NAME' in namespace '$NAMESPACE'."
+  fi
 fi
