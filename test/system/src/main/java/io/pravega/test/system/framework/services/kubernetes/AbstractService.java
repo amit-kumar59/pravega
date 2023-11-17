@@ -197,7 +197,7 @@ public abstract class AbstractService implements Service {
         if (Utils.AUTH_ENABLED) {
             builder.put("authentication", authGenericSpec);
         }
-        log.info("***amit builder ::builder::{}",builder.build().toString());
+        log.info("***amit builder ::builder::{}", builder.build().toString());
 
         return builder.build();
     }
