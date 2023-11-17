@@ -251,6 +251,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 executor).getFuture().get();
         assertTrue(status);
         writeEvents(4, writer);
+        writer.flush();
 
         StreamCut nextStreamCut5 = batchClient.getNextStreamCut(streamCut4, approxDistanceToNextOffset);
         log.info("Next stream cut5 {}", nextStreamCut5);
@@ -380,7 +381,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 executor).getFuture().get();
         assertTrue(status);
         writeEvents(5, writer);
-        Thread.sleep(3000);
+        writer.flush();
 
         StreamCut streamCut2 = batchClient.getNextStreamCut(streamCut1, approxDistanceToNextOffset);
         log.info("Next stream cut2 {}", streamCut2);
@@ -429,7 +430,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 executor).getFuture().get();
         assertTrue(status1);
         writeEvents(5, writer);
-        Thread.sleep(3000);
+        writer.flush();
 
         StreamCut streamCut3 = batchClient.getNextStreamCut(streamCut2, approxDistanceToNextOffset);
         log.info("Next stream cut3 {}", streamCut3);
