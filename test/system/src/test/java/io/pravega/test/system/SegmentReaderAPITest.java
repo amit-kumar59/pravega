@@ -157,9 +157,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 EventWriterConfig.builder().build());
 
         // write events to stream 30 *10  = 300 bytes
-        // writeEvents(10, writer);
         writeEvents(clientFactory, streamName, 10);
-        // Thread.sleep(4000);
 
         //Requested next stream cut at a distance of 170 bytes, and getting the next approx offset as a response.
         StreamCut streamCut1 = batchClient.getNextStreamCut(streamCut0, 170L);
@@ -252,9 +250,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 keyRanges,
                 executor).getFuture().get();
         assertTrue(status);
-        // writeEvents(4, writer);
         writeEvents(clientFactory, streamName, 4);
-        // Thread.sleep(4000);
 
         StreamCut nextStreamCut5 = batchClient.getNextStreamCut(streamCut4, approxDistanceToNextOffset);
         log.info("Next stream cut5 {}", nextStreamCut5);
@@ -343,9 +339,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 EventWriterConfig.builder().build());
 
         // write events to stream 30 * 5  = 150 bytes
-        //writeEvents(5, writer);
         writeEvents(clientFactory, streamName, 5);
-        // Thread.sleep(4000);
 
         //Requested next stream cut at a distance of 180 bytes, and getting the next approx offset as a response.
         StreamCut streamCut1 = batchClient.getNextStreamCut(streamCut0, approxDistanceToNextOffset);
@@ -381,9 +375,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 keyRanges,
                 executor).getFuture().get();
         assertTrue(status);
-        // writeEvents(5, writer);
         writeEvents(clientFactory, streamName, 5);
-        // Thread.sleep(4000);
 
         StreamCut streamCut2 = batchClient.getNextStreamCut(streamCut1, approxDistanceToNextOffset);
         log.info("Next stream cut2 {}", streamCut2);
@@ -431,9 +423,7 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
                 keyRanges1,
                 executor).getFuture().get();
         assertTrue(status1);
-        // writeEvents(5, writer);
         writeEvents(clientFactory, streamName, 5);
-        // Thread.sleep(4000);
 
         StreamCut streamCut3 = batchClient.getNextStreamCut(streamCut2, approxDistanceToNextOffset);
         log.info("Next stream cut3 {}", streamCut3);
