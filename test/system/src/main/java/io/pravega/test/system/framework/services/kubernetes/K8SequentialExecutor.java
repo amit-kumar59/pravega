@@ -173,8 +173,8 @@ public class K8SequentialExecutor implements TestExecutor {
                 hostAliasList = new ArrayList<>();
             }
 
-            String tls_name = Utils.getConfig("tlsCertCNName", "pravega");
-            log.info("Tls name :{}", tls_name);
+            String tlsName = Utils.getConfig("tlsCertCNName", "pravega");
+            log.info("Tls name :{}", tlsName);
 
             hostAliasList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ips.get(0).toString()));
             pod.getSpec().setHostAliases(hostAliasList);
