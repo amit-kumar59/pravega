@@ -59,6 +59,7 @@ import io.pravega.common.function.Callbacks;
 import io.pravega.common.util.AsyncIterator;
 import io.pravega.shared.NameUtils;
 import io.pravega.shared.security.auth.AccessOperation;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.ByteBuffer;
@@ -80,6 +81,7 @@ import static io.pravega.shared.NameUtils.READER_GROUP_STREAM_PREFIX;
  * A stream manager. Used to bootstrap the client.
  */
 @Slf4j
+@Data
 public class StreamManagerImpl implements StreamManager {
 
     private final Controller controller;

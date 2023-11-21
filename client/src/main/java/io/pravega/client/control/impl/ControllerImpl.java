@@ -125,6 +125,7 @@ import io.pravega.shared.protocol.netty.PravegaNodeUri;
 import io.pravega.shared.security.auth.AccessOperation;
 import io.pravega.shared.security.auth.Credentials;
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
@@ -205,6 +206,7 @@ import static io.pravega.shared.controller.tracing.RPCTracingTags.LIST_COMPLETED
 /**
  * RPC based client implementation of Stream Controller V1 API.
  */
+@Data
 public class ControllerImpl implements Controller {
 
     private static final TagLogger log = new TagLogger(LoggerFactory.getLogger(ControllerImpl.class));

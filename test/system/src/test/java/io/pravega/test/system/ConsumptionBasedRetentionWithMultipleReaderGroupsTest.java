@@ -125,36 +125,48 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
     @Environment
     public static void initialize() throws MarathonException {
         URI zkUri = startZookeeperInstance();
-        log.info("zookeeper service details in setup: {}", zkUri);
+        log.info("zookeeper service details in initialize: {}", zkUri);
         startBookkeeperInstances(zkUri);
         URI controllerUri = ensureControllerRunning(zkUri);
-        log.info("controller  uri details in setup: {}", controllerUri);
+        log.info("controller uri details in initialize: {}", controllerUri);
         ensureSegmentStoreRunning(zkUri, controllerUri);
     }
 
     @Before
     public void setup() {
         Service zkService = Utils.createZookeeperService();
-        log.info("zkservice details: {}", zkService);
+        log.info("zkservice details: {}", zkService.getServiceDetails());
 
         assertTrue(zkService.isRunning());
         List<URI> zkUris = zkService.getServiceDetails();
-        log.info("zookeeper service details: {}", zkUris);
+        log.info("zookeeper service details: {} zkUris :{} ", zkUris, zkUris.get(0));
 
         controllerService = Utils.createPravegaControllerService(zkUris.get(0));
+        log.info("Controller service details ::{}, id::{}", controllerService.getServiceDetails(), controllerService.getID());
+
+        //TODO-START
+        Service controllerService1  = Utils.createPravegaControllerService(null);
+        List<URI> ctlURIs = controllerService1.getServiceDetails();
+        log.info("Amit todo controller uris :{} , size :{}", ctlURIs.get(0), ctlURIs.size());
+        //TODO-END
+
         if (!controllerService.isRunning()) {
+            log.info("Controller service is not running ::status{}", controllerService.isRunning());
             controllerService.start(true);
+            log.info("Controller service has started status :{}", controllerService.isRunning());
         }
         List<URI> controllerUris = controllerService.getServiceDetails();
         log.info("controller URI list is: {}", controllerURI);
 
         // Fetch all the RPC endpoints and construct the client URIs.
         List<String> uris = controllerUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
+        log.info("Uri string list :{} size :{}", uris, uris.size());
+
         controllerURI = URI.create((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP + String.join(",", uris));
         log.info("controller URI string list  is: {}", controllerURI);
 
         clientConfig = Utils.buildClientConfig(controllerURI);
-        log.info("client config is: {}", clientConfig.toString());
+        log.info("client config is: {}", clientConfig);
 
         controller = new ControllerImpl(ControllerImplConfig.builder()
                 .clientConfig(clientConfig)
@@ -184,7 +196,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         assertTrue("Creating stream", streamManager.createStream(SCOPE, STREAM, STREAM_CONFIGURATION));
 
         @Cleanup
-        ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(ClientConfig.builder().build());
+        ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(Utils.buildClientConfig(controllerURI));
         log.info("Connection factory : {}", connectionFactory);
 
         @Cleanup
