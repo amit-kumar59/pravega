@@ -156,13 +156,14 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
             log.info("Controller service has started status :{}", controllerService.isRunning());
         }
         List<URI> controllerUris = controllerService.getServiceDetails();
-        log.info("controller URI list is: {}", controllerURI);
+        log.info("controller URI list is: {}", controllerUris);
 
         // Fetch all the RPC endpoints and construct the client URIs.
         List<String> uris = controllerUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
         log.info("Uri string list :{} size :{}", uris, uris.size());
 
-        controllerURI = URI.create((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP + String.join(",", uris));
+        URI.create(TCP + String.join(",", uris));
+        controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
         log.info("controller URI string list  is: {}", controllerURI);
 
         clientConfig = Utils.buildClientConfig(controllerURI);
