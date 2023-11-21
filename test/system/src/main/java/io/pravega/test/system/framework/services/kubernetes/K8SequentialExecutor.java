@@ -68,20 +68,17 @@ public class K8SequentialExecutor implements TestExecutor {
     public CompletableFuture<Void> startTestExecution(Method testMethod) {
         final String className = testMethod.getDeclaringClass().getName();
         final String methodName = testMethod.getName();
-
-        log.info("********K8SequentialExecutor@startTestExecution classname :{} methodname :{}", className, methodName);
         // pod name is the combination of a test method name and random Alphanumeric. It cannot be more than 63 characters.
         final String podName = (methodName + "-" + randomAlphanumeric(5)).toLowerCase();
         log.info("Start execution of test {}#{} on the KUBERNETES Cluster", className, methodName);
 
         final K8sClient client = ClientFactory.INSTANCE.getK8sClient();
-
-        log.info("********K8SequentialExecutor@startTestExecution client :{} ", client);
+        log.info("client details:{}", client);
 
         Map<String, V1ContainerStatus> podStatusBeforeTest = getPravegaPodStatus(client);
 
         final V1Pod pod = getTestPod(className, methodName, podName.toLowerCase(), client);
-        log.info("********K8SequentialExecutor@startTestExecution pod :{} ", pod);
+        log.info("pod details:{}", pod);
 
         final AtomicReference<CompletableFuture<Void>> logDownload = new AtomicReference<>(CompletableFuture.completedFuture(null));
         return client.createServiceAccount(NAMESPACE, getServiceAccount()) // create service Account, ignore if already present.
@@ -138,7 +135,7 @@ public class K8SequentialExecutor implements TestExecutor {
     }
 
     private V1Pod getTestPod(String className, String methodName, String podName, K8sClient client) {
-        log.info("Running test pod with security/auth enabled :{}, transport enabled: {}", Utils.AUTH_ENABLED, Utils.TLS_AND_AUTH_ENABLED);
+        log.info("Running test pod with security enabled :{}, transport enabled: {}", Utils.AUTH_ENABLED, Utils.TLS_AND_AUTH_ENABLED);
         V1Pod pod =  new V1Pod()
                 .metadata(new V1ObjectMeta().name(podName).namespace(NAMESPACE).labels(ImmutableMap.of("POD_NAME", podName, "app", APP)))
                 .spec( new V1PodSpec().serviceAccountName(SERVICE_ACCOUNT).automountServiceAccountToken(true)
@@ -163,34 +160,31 @@ public class K8SequentialExecutor implements TestExecutor {
                                     .flatMap(s -> Stream.of(URI.create(s.getPodIP())))
                                     .collect(Collectors.toList())),
                     t -> new TestFrameworkException(RequestFailed, "Failed to fetch ServiceDetails for pravega-controller", t));
-
-            log.info("********K8SequentialExecutor@getTestpos IPS ::{} IP ::{}", ips, ips.get(0).toString());
+            log.debug("Ips list :{}", ips);
 
             List<V1Volume> volumes = new ArrayList<>(pod.getSpec().getVolumes());
             volumes.add(new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().defaultMode(420).secretName(Utils.TLS_SECRET_NAME)));
             pod.getSpec().setVolumes(volumes);
 
-            log.info("********K8SequentialExecutor@getTestpos get volume spec ::{} ", pod.getSpec().getVolumes());
+            log.info("Volume spec ::{} ", pod.getSpec().getVolumes());
 
-            List<V1HostAlias> hostAliaseList = pod.getSpec().getHostAliases();
-            if (hostAliaseList == null) {
-                hostAliaseList = new ArrayList<>();
+            List<V1HostAlias> hostAliasList = pod.getSpec().getHostAliases();
+            if (hostAliasList == null) {
+                hostAliasList = new ArrayList<>();
             }
 
-            String tlscnname = Utils.getConfig("tlsCertCNName", "pravega");
-            log.info("************tlscnname ::{}", tlscnname);
+            String tls_name = Utils.getConfig("tlsCertCNName", "pravega");
+            log.info("Tls name :{}", tls_name);
 
-            hostAliaseList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ips.get(0).toString()));
-            pod.getSpec().setHostAliases(hostAliaseList);
+            hostAliasList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ips.get(0).toString()));
+            pod.getSpec().setHostAliases(hostAliasList);
 
-            log.info("********K8SequentialExecutor@getTestpos Alliase  ::{} ", pod.getSpec().getHostAliases());
+            log.info("Alliase list  ::{} ", pod.getSpec().getHostAliases());
 
             List<V1VolumeMount> volumeMounts = new ArrayList<>(pod.getSpec().getContainers().get(0).getVolumeMounts());
             volumeMounts.add(new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert"));
             pod.getSpec().getContainers().get(0).setVolumeMounts(volumeMounts);
-
-            log.info("********K8SequentialExecutor@getTestpos VolumeMounts  ::{} ", pod.getSpec().getContainers().get(0).getVolumeMounts());
-            log.info("********K8SequentialExecutor@getTestpos **end of host name added pod->{} ", pod);
+            log.info("Pod details :{} valume mounts :{}", pod, pod.getSpec().getContainers().get(0).getVolumeMounts());
         }
         return pod;
     }

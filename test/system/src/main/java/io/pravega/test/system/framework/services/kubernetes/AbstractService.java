@@ -190,15 +190,14 @@ public abstract class AbstractService implements Service {
                 .put("pravega", pravegaSpec);
         builder.put("version", PRAVEGA_VERSION);
 
-        log.info("TLS_AND_AUTH_ENABLED :{} AUTH_ENABLED :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED);
+        log.info("Tls and auth enabled :{} auth enabled :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED);
         if (Utils.TLS_AND_AUTH_ENABLED) {
             builder.put("tls", tlsSpec);
         }
         if (Utils.AUTH_ENABLED) {
             builder.put("authentication", authGenericSpec);
         }
-        log.info("***amit builder ::builder::{}", builder.build().toString());
-
+        log.info("Pravega specs :{}", builder.build());
         return builder.build();
     }
 

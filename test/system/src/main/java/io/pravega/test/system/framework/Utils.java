@@ -104,7 +104,7 @@ public class Utils {
     }
 
     public static Service createPravegaControllerService(final URI zkUri, String serviceName) {
-        log.info("*****PravegaControllerk8Service@service**********EXECUTOR_TYPE::{}", EXECUTOR_TYPE);
+        log.info("Test executor type : {}", EXECUTOR_TYPE);
         switch (EXECUTOR_TYPE) {
             case REMOTE_SEQUENTIAL:
                 return new PravegaControllerService(serviceName, zkUri);
@@ -155,7 +155,7 @@ public class Utils {
             resourceName = PROPERTIES_FILE_WITH_TLS;
         }
 
-        log.info("AUTH_ENABLED :{} TLS_AND_AUTH_ENABLED:{} resourceName :{}", AUTH_ENABLED, TLS_AND_AUTH_ENABLED, resourceName);
+        log.info("Auth enabled :{} tls and auth enabled :{} resourceName :{}", AUTH_ENABLED, TLS_AND_AUTH_ENABLED, resourceName);
 
         Properties props = new Properties();
         if (System.getProperty(CONFIGS) != null) {
@@ -176,10 +176,10 @@ public class Utils {
     }
 
     public static ClientConfig buildClientConfig(URI controllerUri) {
+        log.info("Default trust store path :{} and validate hostname :{} auth enabled :{}, tls and auth enabled :{}",
+                DEFAULT_TRUSTSTORE_PATH, VALIDATE_HOSTNAME, AUTH_ENABLED, TLS_AND_AUTH_ENABLED);
         if (TLS_AND_AUTH_ENABLED) {
             log.debug("Generating config with tls and auth enabled.");
-            log.info("***Utils@buildClientConfig DEFAULT_TRUSTSTORE_PATH ::{} and VALIDATE_HOSTNAME ::{} ::AUTH_ENABLED::{}",
-                    DEFAULT_TRUSTSTORE_PATH, VALIDATE_HOSTNAME, AUTH_ENABLED);
             return ClientConfig.builder()
                                // TLS-related client-side configuration
                                .trustStore(DEFAULT_TRUSTSTORE_PATH)
