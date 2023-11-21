@@ -750,12 +750,24 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
             List<URI> controllerUris = controllerService.getServiceDetails();
             log.info("Pravega Controller service  details: {}", controllerUris);
             List<String> uris = controllerUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
+
+            log.info("String list uris :{} and its size :{}", uris, uris.size());
+
             assertEquals(instanceCount + " controller instances should be running", instanceCount, uris.size());
             controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
+            log.info("controllerURI 12 :{}", controllerURI);
+
             clientConfig = Utils.buildClientConfig(controllerURI);
+            log.info("clientConfig 12 :{}", clientConfig);
+
             controller = new ControllerImpl(ControllerImplConfig.builder()
                     .clientConfig(clientConfig)
                     .maxBackoffMillis(5000).build(), executor);
+
+            log.info("controller12 :{}", controller);
+
             streamManager = StreamManager.create(clientConfig);
+
+            log.info("streamManager 12 end:{}", streamManager);
         }
 }
