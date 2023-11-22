@@ -161,7 +161,10 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         List<String> uris = controllerUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
         log.info("Uri string list :{} size :{}", uris, uris.size());
 
-        controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
+        controllerURI = URI.create(uris.stream()
+                .map(uri -> (((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) || Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
+                .collect(Collectors.joining(",")));
+
         log.info("controller URI string list  is: {}", controllerURI);
 
         clientConfig = Utils.buildClientConfig(controllerURI);
@@ -754,7 +757,9 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
             log.info("String list uris :{} and its size :{}", uris, uris.size());
 
             assertEquals(instanceCount + " controller instances should be running", instanceCount, uris.size());
-            controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
+            controllerURI = URI.create(uris.stream()
+                    .map(uri -> (((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) || Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
+                    .collect(Collectors.joining(",")));
             log.info("controllerURI 12 :{}", controllerURI);
 
             clientConfig = Utils.buildClientConfig(controllerURI);

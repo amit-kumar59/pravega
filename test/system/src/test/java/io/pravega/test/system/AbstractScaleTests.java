@@ -28,6 +28,8 @@ import io.pravega.test.system.framework.services.Service;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +51,7 @@ abstract class AbstractScaleTests extends AbstractReadWriteTest {
 
     public AbstractScaleTests() {
         controllerURI = createControllerURI();
+        log.info("Controller uri:{}", controllerURI);
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
         connectionFactory = new SocketConnectionFactoryImpl(clientConfig);
         controller = createController(clientConfig);
@@ -65,7 +68,9 @@ abstract class AbstractScaleTests extends AbstractReadWriteTest {
     private URI createControllerURI() {
         Service conService = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = conService.getServiceDetails();
-        return ctlURIs.get(0);
+        return URI.create(ctlURIs.stream()
+                .map(uri -> (((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) || Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
+                .collect(Collectors.joining(",")));
     }
 
     void recordResult(final CompletableFuture<Void> scaleTestResult, final String testName) {
