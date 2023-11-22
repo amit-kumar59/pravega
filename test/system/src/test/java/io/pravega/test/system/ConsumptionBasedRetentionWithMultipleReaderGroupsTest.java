@@ -162,7 +162,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         log.info("Uri string list :{} size :{}", uris, uris.size());
 
         controllerURI = URI.create(uris.stream()
-                .map(uri -> (((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) || Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
+                .map(uri -> (((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED)) ? TLS : TCP) + uri)
                 .collect(Collectors.joining(",")));
 
         log.info("controller URI string list  is: {}", controllerURI);

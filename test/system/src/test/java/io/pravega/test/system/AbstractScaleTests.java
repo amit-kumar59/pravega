@@ -68,8 +68,9 @@ abstract class AbstractScaleTests extends AbstractReadWriteTest {
     private URI createControllerURI() {
         Service conService = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = conService.getServiceDetails();
-        return URI.create(ctlURIs.stream()
-                .map(uri -> (((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) || Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
+        final List<String> uris = ctlURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
+        return URI.create(uris.stream()
+                .map(uri -> ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
                 .collect(Collectors.joining(",")));
     }
 

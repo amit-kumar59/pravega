@@ -96,7 +96,7 @@ public class ReadTxnWriteAutoScaleWithFailoverTest extends AbstractFailoverTests
 
         //controllerURIDirect = URI.create((((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ||  Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
         controllerURIDirect = URI.create(uris.stream()
-                .map(uri -> (((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) || Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
+                .map(uri -> ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
                 .collect(Collectors.joining(",")));
         log.info("Controller Service direct URI: {}", controllerURIDirect);
 
