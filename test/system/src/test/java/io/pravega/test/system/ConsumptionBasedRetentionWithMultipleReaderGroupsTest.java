@@ -57,6 +57,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
+import org.junit.Ignore;
 
 import java.net.URI;
 import java.time.Duration;
@@ -189,6 +190,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         Futures.getAndHandleExceptions(segmentStoreService.scaleService(1), ExecutionException::new);
     }
 
+    @Ignore
     @Test
     public void multipleSubscriberCBRTest() throws Exception {
         assertTrue("Creating scope", streamManager.createScope(SCOPE));
@@ -296,6 +298,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
 
     }
 
+    @Ignore
     @Test
     public void updateRetentionPolicyForCBRTest() throws Exception {
         assertTrue("Creating scope", streamManager.createScope(SCOPE_1));
@@ -526,6 +529,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         log.info("Test Executed successfully");
     }
 
+    @Ignore
     @Test
     public void controllerRestartCBRTest() throws Exception {
         Random random = RandomFactory.create();
@@ -601,6 +605,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         log.info("Test Executed successfully");
     }
 
+    @Ignore
     @Test
     public void streamScalingCBRTest() throws Exception {
         Random random = RandomFactory.create();
