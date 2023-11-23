@@ -116,8 +116,10 @@ public class WatermarkingTest extends AbstractSystemTest {
         controllerInstance = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = controllerInstance.getServiceDetails();
         final List<String> uris = ctlURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
+        log.info("setup uris List :{} first uri :{}", uris, uris.get(0));
 
-        controllerURI = URI.create("tcp://" + String.join(",", uris));
+        controllerURI = URI.create("tcp://" + String.join(",", uris.get(0)));
+        log.info("controllerURI::{}", controllerURI);
         streamManager = StreamManager.create(Utils.buildClientConfig(controllerURI));
         assertTrue("Creating Scope", streamManager.createScope(SCOPE));
         assertTrue("Creating stream", streamManager.createStream(SCOPE, STREAM, config));
@@ -132,11 +134,14 @@ public class WatermarkingTest extends AbstractSystemTest {
     @Test
     public void watermarkingTests() throws Exception {
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
+        log.info("clientConfig ::{}", clientConfig);
+
         @Cleanup
         ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(clientConfig);
         ControllerImpl controller = new ControllerImpl(ControllerImplConfig.builder().clientConfig(clientConfig).build(),
                                                        connectionFactory.getInternalExecutor());
         
+        log.info("controller ::{}", controller);
         // create 2 writers
         @Cleanup
         EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(SCOPE, clientConfig);
@@ -153,17 +158,21 @@ public class WatermarkingTest extends AbstractSystemTest {
         writeEvents(writer1, stopFlag);
         writeEvents(writer2, stopFlag);
 
+        log.info("after write events");
+
         // scale the stream several times so that we get complex positions
         Stream streamObj = Stream.of(SCOPE, STREAM);
         scale(controller, streamObj);
-
+        log.info("after scale");
         @Cleanup
         ClientFactoryImpl syncClientFactory = new ClientFactoryImpl(SCOPE,
                 new ControllerImpl(ControllerImplConfig.builder().clientConfig(clientConfig).build(),
                         connectionFactory.getInternalExecutor()),
                 connectionFactory);
         String markStream = NameUtils.getMarkStreamForStream(STREAM);
-        
+
+        log.info("markStream markStream::{}", markStream);
+
         RevisionedStreamClient<Watermark> watermarkReader = syncClientFactory.createRevisionedStreamClient(markStream,
                 new WatermarkSerializer(),
                 SynchronizerConfig.builder().build());
@@ -175,6 +184,8 @@ public class WatermarkingTest extends AbstractSystemTest {
 
         // scale down one controller instance. 
         Futures.getAndHandleExceptions(controllerInstance.scaleService(1), ExecutionException::new);
+
+        log.info("after scale down one controller instance: ");
 
         // wait until at least 2 more watermarks are emitted
         AssertExtensions.assertEventuallyEquals(true, () -> watermarks.size() >= 4, 100000);
@@ -213,6 +224,7 @@ public class WatermarkingTest extends AbstractSystemTest {
                                                             Map.Entry::getValue));
 
         StreamCut streamCutEnd = new StreamCutImpl(streamObj, positionMap2);
+        log.info("streamCutEnd streamCutEnd::{}", streamCutEnd);
         Map<Stream, StreamCut> end = Collections.singletonMap(streamObj, streamCutEnd);
 
         @Cleanup
@@ -250,6 +262,7 @@ public class WatermarkingTest extends AbstractSystemTest {
                 event = reader.readNextEvent(10000L);
             }
         }
+        log.info("end of this method");
     }
 
     private void fetchWatermarks(RevisionedStreamClient<Watermark> watermarkReader, LinkedBlockingQueue<Watermark> watermarks, AtomicBoolean stop) throws Exception {
