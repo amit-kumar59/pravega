@@ -118,7 +118,7 @@ public class WatermarkingTest extends AbstractSystemTest {
         final List<String> uris = ctlURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
         log.info("setup uris List :{} first uri :{}", uris, uris.get(0));
 
-        controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris.get(0)));
+        controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
         //controllerURI = URI.create("tcp://" + String.join(",", uris.get(0)));
         log.info("controllerURI::{}", controllerURI);
         streamManager = StreamManager.create(Utils.buildClientConfig(controllerURI));
