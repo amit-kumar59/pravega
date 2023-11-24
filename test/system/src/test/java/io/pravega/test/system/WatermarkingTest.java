@@ -183,7 +183,7 @@ public class WatermarkingTest extends AbstractSystemTest {
         log.info("watermarks size1 ::{}",watermarks.size());
 
         AssertExtensions.assertEventuallyEquals(true, () -> watermarks.size() >= 2, 200000);
-
+        log.info("watermarks size2 ::{}",watermarks.size());
         // scale down one controller instance. 
         Futures.getAndHandleExceptions(controllerInstance.scaleService(1), ExecutionException::new);
 
@@ -191,7 +191,7 @@ public class WatermarkingTest extends AbstractSystemTest {
 
         // wait until at least 2 more watermarks are emitted
         AssertExtensions.assertEventuallyEquals(true, () -> watermarks.size() >= 4, 100000);
-
+        log.info("before set to true::{}",watermarks.size());
         stopFlag.set(true);
 
         Watermark watermark0 = watermarks.take();
