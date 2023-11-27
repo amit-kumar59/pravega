@@ -172,12 +172,16 @@ public class WatermarkingTest extends AbstractSystemTest {
                 connectionFactory);
         String markStream = NameUtils.getMarkStreamForStream(STREAM);
 
-        log.info("markStream markStream::{}", markStream);
+        log.info("markStream markStream::{} syncClientFactory ::{}", markStream, syncClientFactory);
 
         RevisionedStreamClient<Watermark> watermarkReader = syncClientFactory.createRevisionedStreamClient(markStream,
                 new WatermarkSerializer(),
                 SynchronizerConfig.builder().build());
-        
+
+        log.info("watermarkReader revision::{}", watermarkReader.getMark());
+        log.info("fetch oldest revision :{}", watermarkReader.fetchOldestRevision());
+        log.info("fetch latest revision :{}", watermarkReader.fetchLatestRevision());
+
         LinkedBlockingQueue<Watermark> watermarks = new LinkedBlockingQueue<>();
         fetchWatermarks(watermarkReader, watermarks, stopFlag);
         log.info("watermarks size1 ::{}", watermarks.size());
@@ -269,10 +273,12 @@ public class WatermarkingTest extends AbstractSystemTest {
 
     private void fetchWatermarks(RevisionedStreamClient<Watermark> watermarkReader, LinkedBlockingQueue<Watermark> watermarks, AtomicBoolean stop) throws Exception {
         AtomicReference<Revision> revision = new AtomicReference<>(watermarkReader.fetchOldestRevision());
+        Revision revision1 = watermarkReader.fetchOldestRevision();
+        log.info("fetchWatermarks revision :{}", revision1);
         log.info("Atomic Boolean status ::{} and watermarks size :{} revision::{}", stop.get(), watermarks.size(), revision.get());
         Futures.loop(() -> !stop.get(), () -> Futures.delayedTask(() -> {
             Iterator<Map.Entry<Revision, Watermark>> marks = watermarkReader.readFrom(revision.get());
-            log.info("marks ::{}", marks);
+            log.info("marks has next::{}", marks.hasNext());
             if (marks.hasNext()) {
                 Map.Entry<Revision, Watermark> next = marks.next();
                 log.info("watermark = {}", next.getValue());

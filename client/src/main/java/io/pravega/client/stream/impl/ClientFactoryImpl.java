@@ -243,11 +243,18 @@ public final class ClientFactoryImpl extends AbstractClientFactoryImpl implement
 
     private <T> RevisionedStreamClient<T> createRevisionedStreamClient(Segment segment, Serializer<T> serializer,
                                                                        SynchronizerConfig config) {
+        log.info("createRevisionedStreamClient segment :{} config :{}", segment, config.getEventWriterConfig());
+
         EventSegmentReader in = inFactory.createEventReaderForSegment(segment, config.getReadBufferSize());
+        log.info("createRevisionedStreamClient event segment reader :{} segment id :{}", in, in.getSegmentId());
         DelegationTokenProvider delegationTokenProvider = DelegationTokenProviderFactory.create(controller, segment,
                 AccessOperation.READ_WRITE);
+        log.info("createRevisionedStreamClient delegationTokenProvider :{}", delegationTokenProvider.retrieveToken());
+
         ConditionalOutputStream cond = condFactory.createConditionalOutputStream(segment, delegationTokenProvider, config.getEventWriterConfig());
+        log.info("createRevisionedStreamClient cond :{}", cond.getScopedSegmentName());
         SegmentMetadataClient meta = metaFactory.createSegmentMetadataClient(segment, delegationTokenProvider);
+        log.info("createRevisionedStreamClient meta :{}", meta.getSegmentInfo());
         return new RevisionedStreamClientImpl<>(segment, in, outFactory, cond, meta, serializer, config.getEventWriterConfig(), delegationTokenProvider, clientConfig);
     }
 
@@ -266,9 +273,13 @@ public final class ClientFactoryImpl extends AbstractClientFactoryImpl implement
     private Segment getSegmentForRevisionedClient(String scope, String streamName) {
         // This validates if the stream exists and returns zero segments if the stream is sealed.
         StreamSegments currentSegments = Futures.getAndHandleExceptions(controller.getCurrentSegments(scope, streamName), InvalidStreamException::new);
+        log.info("segment scope :{} streamName :{} current segment size:{}", scope, streamName, currentSegments.getSegments().size());
+        log.info("Current segment2 number of segment:: {} currentSeg :{}", currentSegments.getNumberOfSegments(), currentSegments.getSegments());
+
         if ( currentSegments == null || currentSegments.getSegments().size() == 0) {
             throw new InvalidStreamException("Stream does not exist: " + streamName);
         }
+        log.info("get segment for key ::{}", currentSegments.getSegmentForKey(0.0));
         return currentSegments.getSegmentForKey(0.0);
     }
 
