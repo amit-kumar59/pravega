@@ -26,7 +26,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static io.pravega.test.system.framework.TestFrameworkException.Type.RequestFailed;
@@ -91,12 +90,12 @@ public class PravegaControllerK8sService extends AbstractService {
         List<V1PodStatus> viPodsList = k8sClient.getStatusOfPodWithLabel(NAMESPACE, "component", PRAVEGA_CONTROLLER_LABEL).join();
         log.info("Pods list size:: {} and pods  list details :: {}", viPodsList.size(), viPodsList);
         log.info("Pods vi pod :: {}", viPodsList.get(0).getPodIP());
-        AtomicInteger number = new AtomicInteger(1);
+
         List<URI> uriList = Futures.getAndHandleExceptions(k8sClient.getStatusOfPodWithLabel(NAMESPACE, "component", PRAVEGA_CONTROLLER_LABEL)
                        .thenApply(statuses -> statuses.stream()
 
-                  .flatMap(s -> Stream.of(URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? tlsCname + number.get() : s.getPodIP()) + ":" + CONTROLLER_GRPC_PORT),
-                                          URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? tlsCname + number.getAndIncrement(): s.getPodIP()) + ":" + CONTROLLER_REST_PORT)))
+                  .flatMap(s -> Stream.of(URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? tlsCname : s.getPodIP()) + ":" + CONTROLLER_GRPC_PORT),
+                                          URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? tlsCname : s.getPodIP()) + ":" + CONTROLLER_REST_PORT)))
                      .collect(Collectors.toList())),
                                               t -> new TestFrameworkException(RequestFailed, "Failed to fetch ServiceDetails for pravega-controller", t));
 
