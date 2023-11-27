@@ -94,10 +94,7 @@ public class ReadTxnWriteAutoScaleWithFailoverTest extends AbstractFailoverTests
         // Fetch all the RPC endpoints and construct the client URIs.
         final List<String> uris = conURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
 
-        //controllerURIDirect = URI.create((((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ||  Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
-        controllerURIDirect = URI.create(uris.stream()
-                .map(uri -> ((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + uri)
-                .collect(Collectors.joining(",")));
+        controllerURIDirect = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
         log.info("Controller Service direct URI: {}", controllerURIDirect);
 
         // Verify segment store is running.
@@ -143,30 +140,40 @@ public class ReadTxnWriteAutoScaleWithFailoverTest extends AbstractFailoverTests
     @Test
     public void readTxnWriteAutoScaleWithFailoverTest() throws Exception {
         createWriters(clientFactory, INIT_NUM_WRITERS, scope, stream);
+        log.info("Amit writers has created");
         createReaders(clientFactory, readerGroupName, scope, readerGroupManager, stream, NUM_READERS);
-
+        log.info("Amit readers has created");
         //run the failover test before scaling
         performFailoverForTestsInvolvingTxns();
-
+        log.info("Amit after first fail over has created");
         //bring the instances back to 3 before performing failover during scaling
         Futures.getAndHandleExceptions(controllerInstance.scaleService(3), ExecutionException::new);
+        log.info("Amit1 after first fail over has created");
         Futures.getAndHandleExceptions(segmentStoreInstance.scaleService(3), ExecutionException::new);
+        log.info("Amit2 after first fail over has created");
         Exceptions.handleInterrupted(() -> Thread.sleep(WAIT_AFTER_FAILOVER_MILLIS));
-
+        log.info("Amit3 after first fail over has created");
         addNewWriters(clientFactory, ADD_NUM_WRITERS, scope, stream);
+        log.info("Amit4 after first fail over has created");
 
         //run the failover test while scaling
         performFailoverForTestsInvolvingTxns();
+        log.info("Amit5 after first fail over has created");
 
         waitForScaling(scope, stream, config);
+        log.info("Amit6 after first fail over has created");
 
         //bring the instances back to 3 before performing failover
         Futures.getAndHandleExceptions(controllerInstance.scaleService(3), ExecutionException::new);
+        log.info("Amit7 after first fail over has created");
         Futures.getAndHandleExceptions(segmentStoreInstance.scaleService(3), ExecutionException::new);
+        log.info("Amit8 after first fail over has created");
         Exceptions.handleInterrupted(() -> Thread.sleep(WAIT_AFTER_FAILOVER_MILLIS));
+        log.info("Amit9 after first fail over has created");
 
         //run the failover test after scaling
         performFailoverForTestsInvolvingTxns();
+        log.info("Ami10 after first fail over has created");
 
         stopWriters();
         waitForTxnsToComplete();
