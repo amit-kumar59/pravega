@@ -113,7 +113,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
                 OK.getStatusCode(),
                 response.getStatus());
 
-        log.info("response status ::{}",response);
+        log.info("response status ::{}", response);
 
         final String scope1 = RandomStringUtils.randomAlphanumeric(10);
         final String stream1 = RandomStringUtils.randomAlphanumeric(10);
@@ -137,7 +137,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         boolean isStreamCreated = streamManager.createStream(scope1, stream1, StreamConfiguration.builder().scalingPolicy(ScalingPolicy.fixed(1)).build());
         assertTrue("Failed to create stream", isStreamCreated);
 
-        log.info("isScopeCreated::{} isStreamCreated :{}",isScopeCreated,isStreamCreated);
+        log.info("isScopeCreated::{} isStreamCreated :{}", isScopeCreated, isStreamCreated);
 
         // Validate that the scope is returned from the request.
         webTarget = client.target(restServerURI).path("v1").path("scopes");
@@ -147,7 +147,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         responseAsString = response.readEntity(String.class);
         assertTrue(responseAsString.contains(String.format("\"scopeName\":\"%s\"", scope1)));
 
-        log.info("Response details1 : {}",response.getStatus());
+        log.info("Response details1 : {}", response.getStatus());
 
         // Validate that the stream is returned from the request.
         webTarget = client.target(restServerURI).path("v1").path("scopes").path(scope1).path("streams");
@@ -156,7 +156,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         assertEquals("Get streams failed.", OK.getStatusCode(), response.getStatus());
         responseAsString = response.readEntity(String.class);
         assertTrue(responseAsString.contains(String.format("\"streamName\":\"%s\"", stream1)));
-        log.info("Response code2 : {}",response.getCookies());
+        log.info("Response code2 : {}", response.getCookies());
         log.info("Test execution completed successfully.");
     }
 }
