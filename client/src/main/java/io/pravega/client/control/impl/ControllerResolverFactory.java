@@ -31,6 +31,7 @@ import io.pravega.controller.stream.api.grpc.v1.ControllerServiceGrpc;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -71,8 +72,11 @@ class ControllerResolverFactory extends NameResolver.Factory {
         final String scheme = targetUri.getScheme();
 
         final String authority = targetUri.getAuthority();
+        log.info("Amit scheme ::{} authority ::{}", scheme, authority);
+
         final List<InetSocketAddress> addresses = Splitter.on(',').splitToList(authority).stream().map(host -> {
             final String[] strings = host.split(":");
+            log.info("Amit strings ::{}", Arrays.toString(strings));
             Preconditions.checkArgument(strings.length == 2, "URI should have both address and port");
             return InetSocketAddress.createUnresolved(strings[0], Integer.parseInt(strings[1]));
         }).collect(Collectors.toList());
@@ -140,7 +144,8 @@ class ControllerResolverFactory extends NameResolver.Factory {
             this.enableDiscovery = enableDiscovery;
             if (this.enableDiscovery) {
                 // We will use the direct scheme to send the discovery RPC request to the controller bootstrap servers.
-                String connectString = "tcp://";
+                String connectString = "tls://";
+                //String connectString = "tcp://";
                 final List<String> strings = this.bootstrapServers.stream()
                         .map(server -> server.getHostString() + ":" + server.getPort())
                         .collect(Collectors.toList());
