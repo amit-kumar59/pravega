@@ -274,7 +274,7 @@ public class WatermarkingTest extends AbstractSystemTest {
     private void fetchWatermarks(RevisionedStreamClient<Watermark> watermarkReader, LinkedBlockingQueue<Watermark> watermarks, AtomicBoolean stop) throws Exception {
         AtomicReference<Revision> revision = new AtomicReference<>(watermarkReader.fetchOldestRevision());
         Revision revision1 = watermarkReader.fetchOldestRevision();
-        log.info("fetchWatermarks revision :{}", revision1);
+        log.info("fetchWatermarks revision : {}", revision1);
         log.info("Atomic Boolean status ::{} and watermarks size :{} revision::{}", stop.get(), watermarks.size(), revision.get());
         Futures.loop(() -> !stop.get(), () -> Futures.delayedTask(() -> {
             Iterator<Map.Entry<Revision, Watermark>> marks = watermarkReader.readFrom(revision.get());

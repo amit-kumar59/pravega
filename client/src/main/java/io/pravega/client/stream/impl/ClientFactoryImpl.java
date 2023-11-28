@@ -40,6 +40,7 @@ import io.pravega.client.segment.impl.SegmentInputStreamFactoryImpl;
 import io.pravega.client.segment.impl.SegmentMetadataClient;
 import io.pravega.client.segment.impl.SegmentMetadataClientFactory;
 import io.pravega.client.segment.impl.SegmentMetadataClientFactoryImpl;
+import io.pravega.client.segment.impl.SegmentInfo;
 import io.pravega.client.segment.impl.SegmentOutputStreamFactory;
 import io.pravega.client.segment.impl.SegmentOutputStreamFactoryImpl;
 import io.pravega.client.state.InitialUpdate;
@@ -65,6 +66,7 @@ import io.pravega.common.concurrent.Futures;
 import io.pravega.shared.NameUtils;
 import io.pravega.shared.security.auth.AccessOperation;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
@@ -249,12 +251,19 @@ public final class ClientFactoryImpl extends AbstractClientFactoryImpl implement
         log.info("createRevisionedStreamClient event segment reader :{} segment id :{}", in, in.getSegmentId());
         DelegationTokenProvider delegationTokenProvider = DelegationTokenProviderFactory.create(controller, segment,
                 AccessOperation.READ_WRITE);
-        log.info("createRevisionedStreamClient delegationTokenProvider :{}", delegationTokenProvider.retrieveToken());
 
         ConditionalOutputStream cond = condFactory.createConditionalOutputStream(segment, delegationTokenProvider, config.getEventWriterConfig());
         log.info("createRevisionedStreamClient cond :{}", cond.getScopedSegmentName());
         SegmentMetadataClient meta = metaFactory.createSegmentMetadataClient(segment, delegationTokenProvider);
-        log.info("createRevisionedStreamClient meta :{}", meta.getSegmentInfo());
+        try {
+            log.info("createRevisionedStreamClient delegationTokenProvider :{}", delegationTokenProvider.retrieveToken().get());
+            SegmentInfo segmentInfo =  meta.getSegmentInfo().get();
+            log.info("createRevisionedStreamClient meta :{}", segmentInfo);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         return new RevisionedStreamClientImpl<>(segment, in, outFactory, cond, meta, serializer, config.getEventWriterConfig(), delegationTokenProvider, clientConfig);
     }
 
