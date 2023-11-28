@@ -144,8 +144,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
             this.enableDiscovery = enableDiscovery;
             if (this.enableDiscovery) {
                 // We will use the direct scheme to send the discovery RPC request to the controller bootstrap servers.
-                String connectString = "tls://";
-                //String connectString = "tcp://";
+                String connectString = "tcp://";
                 final List<String> strings = this.bootstrapServers.stream()
                         .map(server -> server.getHostString() + ":" + server.getPort())
                         .collect(Collectors.toList());

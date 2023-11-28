@@ -176,14 +176,11 @@ public class K8SequentialExecutor implements TestExecutor {
             String tlsName = Utils.getConfig("tlsCertCNName", "pravega");
             log.info("Tls name :{}", tlsName);
 
-            for (URI ipAddress : ips) {
-                hostAliasList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ipAddress.toString()));
-            }
-            //hostAliasList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ips.get(0).toString()));
+            hostAliasList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ips.get(0).toString()));
+            hostAliasList.add(new V1HostAlias().addHostnamesItem("localhost").ip("127.0.0.1"));
             pod.getSpec().setHostAliases(hostAliasList);
 
             log.info("Alliase list  ::{} ", pod.getSpec().getHostAliases());
-            log.info("Alliase list  size ::{} hostAlliase ::{}", hostAliasList.size(), hostAliasList);
 
             List<V1VolumeMount> volumeMounts = new ArrayList<>(pod.getSpec().getContainers().get(0).getVolumeMounts());
             volumeMounts.add(new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert"));
