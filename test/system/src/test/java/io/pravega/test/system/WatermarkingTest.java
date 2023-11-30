@@ -114,6 +114,15 @@ public class WatermarkingTest extends AbstractSystemTest {
 
     @Before
     public void setup() {
+
+        try {
+            log.info("*****setup sleeping for 5 minutes*****");
+            Thread.sleep(300000);
+            log.info("*****setup wake up after 5 minutes*****");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         controllerInstance = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = controllerInstance.getServiceDetails();
         final List<String> uris = ctlURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
