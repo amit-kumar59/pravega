@@ -121,8 +121,9 @@ public class WatermarkingTest extends AbstractSystemTest {
 
         controllerURI = URI.create("tcp://" + String.join(",", uris));
         if (Utils.TLS_AND_AUTH_ENABLED) {
-            controllerURI = URI.create("tls://" + Utils.getConfig("tlsCertCNName", "pravega") + ":" + CONTROLLER_GRPC_PORT);
+            controllerURI = URI.create("tls://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT);
         }
+        log.info("setup controller uri :{}", controllerURI);
         streamManager = StreamManager.create(Utils.buildClientConfig(controllerURI));
         assertTrue("Creating Scope", streamManager.createScope(SCOPE));
         assertTrue("Creating stream", streamManager.createStream(SCOPE, STREAM, config));
