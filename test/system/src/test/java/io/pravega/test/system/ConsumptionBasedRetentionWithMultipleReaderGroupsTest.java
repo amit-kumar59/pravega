@@ -94,7 +94,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
     private static final String READER_GROUP_4 = "timeBasedRetentionReaderGroup" + RandomFactory.create().nextInt(Integer.MAX_VALUE);
     private static final String SIZE_30_EVENT = "data of size 30";
     private static final long CLOCK_ADVANCE_INTERVAL = 5 * 1000000000L;
-
+    private static final int CONTROLLER_GRPC_PORT = 9090;
     private static final int READ_TIMEOUT = 1000;
     private static final int MAX_SIZE_IN_STREAM = 180;
     private static final int MIN_SIZE_IN_STREAM = 90;
@@ -162,7 +162,12 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         List<String> uris = controllerUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
         log.info("Uri string list :{} size :{}", uris, uris.size());
 
-        controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
+        if (Utils.TLS_AND_AUTH_ENABLED) {
+            controllerURI = URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT);
+        } else {
+            controllerURI = URI.create(TCP + String.join(",", uris));
+        }
+
         log.info("controller URI string list  is: {}", controllerURI);
 
         clientConfig = Utils.buildClientConfig(controllerURI);
@@ -759,7 +764,12 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
             log.info("String list uris :{} and its size :{}", uris, uris.size());
 
             assertEquals(instanceCount + " controller instances should be running", instanceCount, uris.size());
-            controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
+
+            if (Utils.TLS_AND_AUTH_ENABLED) {
+                controllerURI = URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT);
+            } else {
+                controllerURI = URI.create(TCP + String.join(",", uris));
+            }
             log.info("controllerURI 12 :{}", controllerURI);
 
             clientConfig = Utils.buildClientConfig(controllerURI);

@@ -51,6 +51,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SystemTestRunner.class)
 public class MultiControllerTest extends AbstractSystemTest {
 
+    private static final int CONTROLLER_GRPC_PORT = 9090;
     private final ScheduledExecutorService executorService = ExecutorServiceHelpers.newScheduledThreadPool(1, "test");
     private Service controllerService = null;
     private Service segmentStoreService = null;
@@ -90,12 +91,16 @@ public class MultiControllerTest extends AbstractSystemTest {
         final List<String> uris = conUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
         assertEquals("2 controller instances should be running", 2, uris.size());
 
-        // use the last two uris
-        controllerURIDirect.set(URI.create((Utils.TLS_AND_AUTH_ENABLED ? TLS : TCP) + String.join(",", uris)));
-        log.info("Controller Service direct URI: {}", controllerURIDirect);
-        controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
+        if (Utils.TLS_AND_AUTH_ENABLED) {
+            controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+            controllerURIDiscover.set(URI.create("pravega://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+        } else {
+            // use the last two uris
+            controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
+            log.info("Controller Service direct URI: {}", controllerURIDirect);
+            controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
+        }
         log.info("Controller Service discovery URI: {}", controllerURIDiscover);
-
         segmentStoreService = Utils.createPravegaSegmentStoreService(zkUris.get(0), controllerService.getServiceDetails().get(0));
     }
 

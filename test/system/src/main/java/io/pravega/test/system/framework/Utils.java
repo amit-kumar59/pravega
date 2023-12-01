@@ -176,8 +176,8 @@ public class Utils {
     }
 
     public static ClientConfig buildClientConfig(URI controllerUri) {
-        log.info("Default trust store path :{} and validate hostname :{} auth enabled :{}, tls and auth enabled :{}",
-                DEFAULT_TRUSTSTORE_PATH, VALIDATE_HOSTNAME, AUTH_ENABLED, TLS_AND_AUTH_ENABLED);
+        log.info("Default trust store path :{} and validate hostname :{} auth enabled :{}, tls and auth enabled :{} controllerUri :{}",
+                DEFAULT_TRUSTSTORE_PATH, VALIDATE_HOSTNAME, AUTH_ENABLED, TLS_AND_AUTH_ENABLED, controllerUri);
         if (TLS_AND_AUTH_ENABLED) {
             log.debug("Generating config with tls and auth enabled.");
             return ClientConfig.builder()
@@ -237,7 +237,7 @@ public class Utils {
 
     private static boolean isTLSEnabled() {
         String tlsEnabled = Utils.getConfig("tlsEnabled", "false");
-        return Boolean.valueOf(tlsEnabled);
+        return Boolean.valueOf(tlsEnabled) && isAuthEnabled();
     }
 
     public static boolean isSkipLogDownloadEnabled() {

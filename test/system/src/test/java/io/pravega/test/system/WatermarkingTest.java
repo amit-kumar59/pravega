@@ -108,7 +108,7 @@ public class WatermarkingTest extends AbstractSystemTest {
     public static void initialize() throws MarathonException, ExecutionException {
         URI zkUri = startZookeeperInstance();
         startBookkeeperInstances(zkUri);
-        URI controllerUri = startPravegaControllerInstances(zkUri, 1);
+        URI controllerUri = startPravegaControllerInstances(zkUri, 2);
         ensureSegmentStoreRunning(zkUri, controllerUri);
     }
 
@@ -190,7 +190,7 @@ public class WatermarkingTest extends AbstractSystemTest {
         AssertExtensions.assertEventuallyEquals(true, () -> watermarks.size() >= 2, 200000);
         log.info("watermarks size2 ::{}", watermarks.size());
         // scale down one controller instance. 
-        //Futures.getAndHandleExceptions(controllerInstance.scaleService(1), ExecutionException::new);
+        Futures.getAndHandleExceptions(controllerInstance.scaleService(1), ExecutionException::new);
 
         log.info("after scale down one controller instance: watermarks size::{}", watermarks.size());
 
