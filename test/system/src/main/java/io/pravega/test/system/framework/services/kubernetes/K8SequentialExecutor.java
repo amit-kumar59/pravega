@@ -168,17 +168,17 @@ public class K8SequentialExecutor implements TestExecutor {
 
             log.info("Volume spec ::{} ", pod.getSpec().getVolumes());
 
-            List<V1HostAlias> hostAliasList = pod.getSpec().getHostAliases();
+            /*List<V1HostAlias> hostAliasList = pod.getSpec().getHostAliases();
             if (hostAliasList == null) {
                 hostAliasList = new ArrayList<>();
-            }
+            }*/
 
             String tlsName = Utils.getConfig("tlsCertCNName", "pravega");
             log.info("Tls name :{}", tlsName);
 
-            hostAliasList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ips.get(0).toString()));
-            hostAliasList.add(new V1HostAlias().addHostnamesItem("localhost").ip("127.0.0.1"));
-            pod.getSpec().setHostAliases(hostAliasList);
+           // hostAliasList.add(new V1HostAlias().addHostnamesItem(Utils.getConfig("tlsCertCNName", "pravega")).ip(ips.get(0).toString()));
+           // hostAliasList.add(new V1HostAlias().addHostnamesItem("localhost").ip("127.0.0.1"));
+           // pod.getSpec().setHostAliases(hostAliasList);
 
             log.info("Alliase list  ::{} ", pod.getSpec().getHostAliases());
 
