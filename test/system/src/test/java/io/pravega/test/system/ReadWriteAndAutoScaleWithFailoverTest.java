@@ -100,8 +100,6 @@ public class ReadWriteAndAutoScaleWithFailoverTest extends AbstractFailoverTests
         } else {
             controllerURIDirect = URI.create("tcp://" + String.join(",", uris));
         }
-
-        //controllerURIDirect = URI.create("tcp://" + String.join(",", uris));
         log.info("Controller Service direct URI: {}", controllerURIDirect);
 
         // Verify segment store is running.
