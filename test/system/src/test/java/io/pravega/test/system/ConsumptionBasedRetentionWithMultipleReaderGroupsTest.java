@@ -57,7 +57,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
-import org.junit.Ignore;
 
 import java.net.URI;
 import java.time.Duration;
@@ -142,14 +141,6 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         log.info("zookeeper service details: {} zkUris :{} ", zkUris, zkUris.get(0));
 
         controllerService = Utils.createPravegaControllerService(zkUris.get(0));
-        log.info("Controller service details ::{}, id::{}", controllerService.getServiceDetails(), controllerService.getID());
-
-        //TODO-START
-        Service controllerService1  = Utils.createPravegaControllerService(null);
-        List<URI> ctlURIs = controllerService1.getServiceDetails();
-        log.info("Amit todo controller uris :{} , size :{}", ctlURIs.get(0), ctlURIs.size());
-        //TODO-END
-
         if (!controllerService.isRunning()) {
             log.info("Controller service is not running ::status{}", controllerService.isRunning());
             controllerService.start(true);
@@ -161,13 +152,11 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         // Fetch all the RPC endpoints and construct the client URIs.
         List<String> uris = controllerUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
         log.info("Uri string list :{} size :{}", uris, uris.size());
-
         if (Utils.TLS_AND_AUTH_ENABLED) {
             controllerURI = URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT);
         } else {
             controllerURI = URI.create(TCP + String.join(",", uris));
         }
-
         log.info("controller URI string list  is: {}", controllerURI);
 
         clientConfig = Utils.buildClientConfig(controllerURI);
@@ -606,7 +595,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
                 5000,  2 * 60 * 1000L);
         log.info("Test Executed successfully");
     }
-    
+
     @Test
     public void streamScalingCBRTest() throws Exception {
         Random random = RandomFactory.create();
