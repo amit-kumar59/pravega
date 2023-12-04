@@ -100,7 +100,6 @@ public class ReadTxnWriteAutoScaleWithFailoverTest extends AbstractFailoverTests
         } else {
             controllerURIDirect = URI.create("tcp://" + String.join(",", uris));
         }
-        controllerURIDirect = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
         log.info("Controller Service direct URI: {}", controllerURIDirect);
 
         // Verify segment store is running.
@@ -119,6 +118,8 @@ public class ReadTxnWriteAutoScaleWithFailoverTest extends AbstractFailoverTests
                                          .clientConfig(clientConfig)
                                          .maxBackoffMillis(5000).build(),
                 controllerExecutorService);
+        log.info("set up clientconfig : {}", clientConfig);
+
         testState = new TestState(true);
         streamManager = new StreamManagerImpl(clientConfig);
         createScopeAndStream(scope, stream, config, streamManager);
@@ -126,6 +127,7 @@ public class ReadTxnWriteAutoScaleWithFailoverTest extends AbstractFailoverTests
 
         clientFactory = new ClientFactoryImpl(scope, controller, clientConfig);
         readerGroupManager = ReaderGroupManager.withScope(scope, clientConfig);
+        log.info("Set up has completed!!");
     }
 
     @After

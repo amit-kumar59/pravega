@@ -38,9 +38,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 abstract class AbstractScaleTests extends AbstractReadWriteTest {
-
-    private static final int CONTROLLER_GRPC_PORT = 9090;
     final static String SCOPE = "testAutoScale" + RandomFactory.create().nextInt(Integer.MAX_VALUE);
+    private static final int CONTROLLER_GRPC_PORT = 9090;
     @Getter
     private final URI controllerURI;
     @Getter

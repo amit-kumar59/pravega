@@ -175,9 +175,14 @@ abstract class AbstractFailoverTests extends AbstractReadWriteTest {
 
     void waitForScaling(String scope, String stream, StreamConfiguration initialConfig) {
         int initialMaxSegmentNumber = initialConfig.getScalingPolicy().getMinNumSegments() - 1;
+        log.info("waitFor scaling initial max seg number :{} SCALE_WAIT_ITERATIONS :{}", initialMaxSegmentNumber, SCALE_WAIT_ITERATIONS);
         boolean scaled = false;
         for (int waitCounter = 0; waitCounter < SCALE_WAIT_ITERATIONS; waitCounter++) {
             StreamSegments streamSegments = controller.getCurrentSegments(scope, stream).join();
+            log.info("waitFor scaling streamSegments : {} ", streamSegments);
+            long segmentCount = streamSegments.getSegments().stream().mapToLong(Segment::getSegmentId).max().orElse(-1);
+
+            log.info("segmentCount ::{} waitCounter :{}", segmentCount, waitCounter);
             if (streamSegments.getSegments().stream().mapToLong(Segment::getSegmentId).max().orElse(-1) > initialMaxSegmentNumber) {
                 scaled = true;
                 break;
@@ -187,5 +192,6 @@ abstract class AbstractFailoverTests extends AbstractReadWriteTest {
         }
 
         assertTrue("Scaling did not happen within desired time", scaled);
+        log.info("waitForScaling completed.");
     }
 }
