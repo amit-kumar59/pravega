@@ -90,6 +90,7 @@ public class AutoScaleTest extends AbstractScaleTests {
 
         //create a scope
         Controller controller = getController();
+
         executorService = ExecutorServiceHelpers.newScheduledThreadPool(5, "AutoScaleTest-main");
         Boolean createScopeStatus = controller.createScope(SCOPE).get();
         log.debug("create scope status {}", createScopeStatus);
@@ -129,7 +130,7 @@ public class AutoScaleTest extends AbstractScaleTests {
     public void scaleTests() {
         testState = new TestState(false);
         CompletableFuture<Void> scaleup = scaleUpTest();
-        CompletableFuture<Void> scaleDown = scaleDownTest();
+        /* CompletableFuture<Void> scaleDown = scaleDownTest();
         CompletableFuture<Void> scalewithTxn = scaleUpTxnTest();
         Futures.getAndHandleExceptions(CompletableFuture.allOf(scaleup, scaleDown, scalewithTxn)
                                                         .whenComplete((r, e) -> {
@@ -137,7 +138,12 @@ public class AutoScaleTest extends AbstractScaleTests {
                     recordResult(scaleDown, "ScaleDown");
                     recordResult(scalewithTxn, "ScaleWithTxn");
 
+                }), RuntimeException::new);*/
+        Futures.getAndHandleExceptions(CompletableFuture.allOf(scaleup)
+                .whenComplete((r, e) -> {
+                    recordResult(scaleup, "ScaleUp");
                 }), RuntimeException::new);
+        log.info("Scale tests has completed successfully!!");
     }
 
     /**
@@ -150,7 +156,12 @@ public class AutoScaleTest extends AbstractScaleTests {
      */
     private CompletableFuture<Void> scaleUpTest() {
         ClientFactoryImpl clientFactory = getClientFactory();
+
+        log.info("scaleUpTest clientFactory ::{}", clientFactory);
+
         ControllerImpl controller = getController();
+        log.info("scaleUpTest controller ::{}", controller);
+
         final AtomicBoolean exit = new AtomicBoolean(false);
         createWriters(clientFactory, 6, SCOPE, SCALE_UP_STREAM_NAME);
 

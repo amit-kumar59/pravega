@@ -192,7 +192,7 @@ abstract class AbstractReadWriteTest extends AbstractSystemTest {
                     // seq_number is monotonically increasing for every routing key, being the expected delta between
                     // consecutive seq_number values always 1.
                     final String eventContent = uniqueRoutingKey + RK_VALUE_SEPARATOR + seqNumber;
-                    log.debug("Event write count before write call {}", testState.getEventWrittenCount());
+                    log.debug("Event write count before write call {} eventContent :{} stop flag ::{}", testState.getEventWrittenCount(), eventContent, stopFlag.get());
                     writer.writeEvent(uniqueRoutingKey, eventContent);
                     log.debug("Event write count before flush {}", testState.getEventWrittenCount());
                     writer.flush();
