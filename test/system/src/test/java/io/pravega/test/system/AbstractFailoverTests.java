@@ -182,15 +182,19 @@ abstract class AbstractFailoverTests extends AbstractReadWriteTest {
             log.info("waitFor scaling streamSegments : {} ", streamSegments);
             long segmentCount = streamSegments.getSegments().stream().mapToLong(Segment::getSegmentId).max().orElse(-1);
 
-            log.info("segmentCount ::{} waitCounter :{}", segmentCount, waitCounter);
-            if (streamSegments.getSegments().stream().mapToLong(Segment::getSegmentId).max().orElse(-1) > initialMaxSegmentNumber) {
+            log.info("segmentCount ::{} waitCounter :{} initialMaxSegmentNumber ::{} condition status :{}", segmentCount, waitCounter, initialMaxSegmentNumber,
+                    segmentCount > initialMaxSegmentNumber);
+            if (segmentCount > initialMaxSegmentNumber) {
+                log.info("inside if scaled ::{}", scaled);
                 scaled = true;
+                log.info("inside if after scaled ::{}", scaled);
                 break;
             }
+            log.info("*****after if****");
             //Scaling operation did not happen, wait
             Exceptions.handleInterrupted(() -> Thread.sleep(10000));
         }
-
+        log.info("****after for loop scaled::{}***", scaled);
         assertTrue("Scaling did not happen within desired time", scaled);
         log.info("waitForScaling completed.");
     }
