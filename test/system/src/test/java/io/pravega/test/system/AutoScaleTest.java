@@ -60,7 +60,7 @@ public class AutoScaleTest extends AbstractScaleTests {
 
     //The execution time for @Before + @After + @Test methods should be less than 10 mins. Else the test will timeout.
     @Rule
-    public Timeout globalTimeout = Timeout.seconds(15 * 60);
+    public Timeout globalTimeout = Timeout.seconds(10 * 60);
 
     private final ScheduledExecutorService scaleExecutorService = ExecutorServiceHelpers.newScheduledThreadPool(5, "autoscaletest");
 
@@ -84,7 +84,6 @@ public class AutoScaleTest extends AbstractScaleTests {
 
         //create a scope
         Controller controller = getController();
-
         executorService = ExecutorServiceHelpers.newScheduledThreadPool(5, "AutoScaleTest-main");
         Boolean createScopeStatus = controller.createScope(SCOPE).get();
         log.debug("create scope status {}", createScopeStatus);
@@ -94,7 +93,7 @@ public class AutoScaleTest extends AbstractScaleTests {
         log.debug("create stream status for scale up stream {}", createStreamStatus);
 
         //createStreamStatus = controller.createStream(SCOPE, SCALE_DOWN_STREAM_NAME, CONFIG_DOWN).get();
-        log.debug("create stream status for scaledown stream {}", createStreamStatus);
+        //log.debug("create stream status for scaledown stream {}", createStreamStatus);
 
         //log.debug("scale down stream starting segments:" + controller.getCurrentSegments(SCOPE, SCALE_DOWN_STREAM_NAME).get().getSegments().size());
 
@@ -157,10 +156,10 @@ public class AutoScaleTest extends AbstractScaleTests {
         log.info("scaleUpTest controller ::{}", controller);
 
         final AtomicBoolean exit = new AtomicBoolean(false);
-        createWriters(clientFactory, 20, SCOPE, SCALE_UP_STREAM_NAME);
+        createWriters(clientFactory, 6, SCOPE, SCALE_UP_STREAM_NAME);
 
         // overall wait for test to complete in 260 seconds (4.2 minutes) or scale up, whichever happens first.
-        return Retry.withExpBackoff(10, 10, 50, Duration.ofSeconds(10).toMillis())
+        return Retry.withExpBackoff(10, 10, 30, Duration.ofSeconds(10).toMillis())
                 .retryingOn(ScaleOperationNotDoneException.class)
                 .throwingOn(RuntimeException.class)
                 .runAsync(() -> controller.getCurrentSegments(SCOPE, SCALE_UP_STREAM_NAME)

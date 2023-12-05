@@ -226,10 +226,14 @@ public class AutoScaleProcessor implements AutoCloseable {
             log.info(requestId, "sending request for scale up for {}", streamSegmentName);
 
             Segment segment = Segment.fromScopedName(streamSegmentName);
+            log.info("Segment info::{}", segment);
+
             AutoScaleEvent event = new AutoScaleEvent(segment.getScope(), segment.getStreamName(), segment.getSegmentId(),
                     AutoScaleEvent.UP, timestamp, numOfSplits, false, requestId);
+            log.info("event info :{}", event);
             // Mute scale for timestamp for both scale up and down
             writeRequest(event, () -> cache.put(streamSegmentName, new ImmutablePair<>(timestamp, timestamp)));
+            log.info("trigger scale up finished");
         }
     }
 
@@ -259,7 +263,9 @@ public class AutoScaleProcessor implements AutoCloseable {
     }
 
     private void writeRequest(AutoScaleEvent event, Runnable successCallback) {
+        log.info("***Write request started*** event id ::{}", event.getRequestId());
         startInitWriter.set(true);
+        log.info("Write request event key ::{}", event.getKey());
         writer.thenCompose(w -> w.writeEvent(event.getKey(), event)
                     .whenComplete((r, e) -> {
                         if (e != null) {
@@ -270,6 +276,7 @@ public class AutoScaleProcessor implements AutoCloseable {
                             successCallback.run();
                         }
                     }));
+        log.info("***Write request finished*** event id ::{}", event.getRequestId());
     }
 
     void report(String streamSegmentName, long targetRate, long startTime, double twoMinuteRate, double fiveMinuteRate, double tenMinuteRate, double twentyMinuteRate) {
@@ -290,6 +297,7 @@ public class AutoScaleProcessor implements AutoCloseable {
                 log.debug("triggering scale up for {} with number of splits {}", streamSegmentName, numOfSplits);
 
                 triggerScaleUp(streamSegmentName, numOfSplits);
+               log.info("if block after trigger scale up.");
             }
 
             if (twoMinuteRate < targetRate &&
@@ -302,6 +310,7 @@ public class AutoScaleProcessor implements AutoCloseable {
                 triggerScaleDown(streamSegmentName, false);
             }
         }
+        log.info("report method call has finished.");
     }
 
     void notifyCreated(String segmentStreamName) {
