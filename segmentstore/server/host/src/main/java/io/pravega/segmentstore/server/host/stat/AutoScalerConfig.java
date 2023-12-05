@@ -123,7 +123,8 @@ public class AutoScalerConfig {
         this.muteDuration = Duration.ofSeconds(properties.getInt(MUTE_IN_SECONDS));
         this.cacheCleanup = Duration.ofSeconds(properties.getInt(CACHE_CLEANUP_IN_SECONDS));
         this.cacheExpiry = Duration.ofSeconds(properties.getInt(CACHE_EXPIRY_IN_SECONDS));
-        this.controllerUri = URI.create(properties.get(CONTROLLER_URI));
+        //this.controllerUri = URI.create(properties.get(CONTROLLER_URI));
+        this.controllerUri = URI.create("tls://pravega-pravega-controller.default:9090");
         this.tlsEnabled = properties.getBoolean(TLS_ENABLED);
         this.authEnabled = properties.getBoolean(AUTH_ENABLED);
         this.tlsCertFile = properties.get(TLS_CERT_FILE);
