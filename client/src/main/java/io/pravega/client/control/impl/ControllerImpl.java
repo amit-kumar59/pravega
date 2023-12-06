@@ -366,10 +366,13 @@ public class ControllerImpl implements Controller {
 
     @Override
     public CompletableFuture<Boolean> createScope(final String scopeName) {
+        log.info("--createScope started scopeName::{}", scopeName);
         Exceptions.checkNotClosed(closed.get(), this);
+        log.info("createScope started1");
         final long requestId = requestIdGenerator.get();
+        log.info("createScope requestId:{}", requestId);
         long traceId = LoggerHelpers.traceEnter(log, "createScope", scopeName, requestId);
-
+        log.info("createScope traceId:{}", traceId);
         final CompletableFuture<CreateScopeStatus> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<CreateScopeStatus> callback = new RPCAsyncCallback<>(requestId, "createScope", scopeName);
             new ControllerClientTagger(client, timeoutMillis).withTag(requestId, CREATE_SCOPE, scopeName)
@@ -397,7 +400,7 @@ public class ControllerImpl implements Controller {
             }
         }, this.executor).whenComplete((x, e) -> {
             if (e != null) {
-                log.warn(requestId, "createScope {} failed: ", scopeName, e);
+                log.warn(requestId, "createScope amit {} failed: ", scopeName, e);
             }
             LoggerHelpers.traceLeave(log, "createScope", traceId, scopeName, requestId);
         });
