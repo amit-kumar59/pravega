@@ -93,13 +93,13 @@ public class MultiControllerTest extends AbstractSystemTest {
 
         if (Utils.TLS_AND_AUTH_ENABLED) {
             controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
-            controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+            //controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
         } else {
             // use the last two uris
             controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
             log.info("Controller Service direct URI: {}", controllerURIDirect);
-            controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
         }
+        controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
         log.info("Controller Service discovery URI: {}", controllerURIDiscover);
         segmentStoreService = Utils.createPravegaSegmentStoreService(zkUris.get(0), controllerService.getServiceDetails().get(0));
     }
@@ -133,21 +133,29 @@ public class MultiControllerTest extends AbstractSystemTest {
         withControllerURIDirect();
         log.info("Test pravega:// with only 1 controller instance running");
         withControllerURIDiscover();
-
+        log.info("after with controller uri Discover");
         // All APIs should throw exception and fail.
         Futures.getAndHandleExceptions(controllerService.scaleService(0), ExecutionException::new);
+        log.info("after scale services");
 
         AssertExtensions.assertEventuallyEquals("Problem scaling down the Controller service.", true,
                 () -> controllerService.getServiceDetails().isEmpty(), 1000, 30000);
+        log.info("after assertEventuallyEquals");
         controllerURIDirect.set(URI.create("tcp://0.0.0.0:9090"));
+
+        log.info(" amit controllerURIDirect ::{}", controllerURIDirect.get());
+
         controllerURIDiscover.set(URI.create("pravega://0.0.0.0:9090"));
+        log.info(" amit controllerURIDiscover ::{}", controllerURIDiscover.get());
 
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURIDirect.get());
         log.info("Test tcp:// with no controller instances running");
+        log.info(" amit clientConfig ::{}", clientConfig);
         AssertExtensions.assertThrows("Should throw RetriesExhaustedException",
                 () -> createScope("scope" + RandomStringUtils.randomAlphanumeric(10), clientConfig),
                 throwable -> throwable instanceof RetriesExhaustedException);
 
+        log.info("After assert THrows");
         if (!DOCKER_BASED) {
             log.info("Test pravega:// with no controller instances running");
             AssertExtensions.assertThrows("Should throw RetriesExhaustedException",
