@@ -192,10 +192,9 @@ abstract class AbstractFailoverTests extends AbstractReadWriteTest {
             }
             log.info("*****after if****");
             //Scaling operation did not happen, wait
-            Exceptions.handleInterrupted(() -> Thread.sleep(20000));
+            Exceptions.handleInterrupted(() -> Thread.sleep(10000));
         }
         log.info("****after for loop scaled::{}***", scaled);
-        Exceptions.handleInterrupted(() -> Thread.sleep(300000));
         assertTrue("Scaling did not happen within desired time", scaled);
         log.info("waitForScaling completed.");
     }
