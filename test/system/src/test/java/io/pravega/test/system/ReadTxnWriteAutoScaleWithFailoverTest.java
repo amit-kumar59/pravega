@@ -184,11 +184,16 @@ public class ReadTxnWriteAutoScaleWithFailoverTest extends AbstractFailoverTests
         log.info("Ami10 after first fail over has created");
 
         stopWriters();
+        log.info("Amit  stop writers has completed");
         waitForTxnsToComplete();
+        log.info("Amit  wait for transaction has completed");
         stopReaders();
+        log.info("Amit  stop readers has completed");
         validateResults();
+        log.info("validation of results has done");
 
         cleanUp(scope, stream, readerGroupManager, readerGroupName); //cleanup if validation is successful.
+        log.info("clean up has completed");
         testState.checkForAnomalies();
         log.info("Test ReadTxnWriteAutoScaleWithFailover succeeds");
     }

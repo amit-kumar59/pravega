@@ -244,8 +244,8 @@ public class ControllerServiceStarter extends AbstractIdleService implements Aut
             // This client config is used by the segment store helper (SegmentHelper) to connect to the segment store.
             ClientConfig.ClientConfigBuilder clientConfigBuilder = ClientConfig.builder()
                     .controllerURI(URI.create((grpcServerConfig.isTlsEnabled() ?
-                            "tls://" : "tcp://") + "localhost:" + grpcServerConfig.getPort()))
-                    //"tls://" : "tcp://") + "pravega-pravega-controller:" + grpcServerConfig.getPort()))
+                            //"tls://" : "tcp://") + "localhost:" + grpcServerConfig.getPort()))
+                            "tls://" : "tcp://") + "pravega-pravega-controller:" + grpcServerConfig.getPort()))
                     .trustStore(grpcServerConfig.getTlsTrustStore())
                     .validateHostName(false);
 
