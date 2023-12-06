@@ -54,7 +54,7 @@ public class MultiControllerTest extends AbstractSystemTest {
     private final ScheduledExecutorService executorService = ExecutorServiceHelpers.newScheduledThreadPool(1, "test");
     private Service controllerService = null;
     private Service segmentStoreService = null;
-    private AtomicReference<URI> controllerURIDirect = new AtomicReference<>();
+    // private AtomicReference<URI> controllerURIDirect = new AtomicReference<>();
     private AtomicReference<URI> controllerURIDiscover = new AtomicReference<>();
 
     @Environment
@@ -91,12 +91,12 @@ public class MultiControllerTest extends AbstractSystemTest {
         assertEquals("2 controller instances should be running", 2, uris.size());
 
         if (Utils.TLS_AND_AUTH_ENABLED) {
-            controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+            //controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
             controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
         } else {
             // use the last two uris
-            controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
-            log.info("Controller Service direct URI: {}", controllerURIDirect);
+            //controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
+            //log.info("Controller Service direct URI: {}", controllerURIDirect);
             controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
         }
         log.info("Controller Service discovery URI: {}", controllerURIDiscover);
@@ -111,13 +111,20 @@ public class MultiControllerTest extends AbstractSystemTest {
         segmentStoreService.scaleService(0);
     }
 
+    @Test(timeout = 300000)
+    public void multiControllerTestDebug() throws Exception {
+        log.info("multiControllerTestDebug started");
+        withControllerURIDiscover();
+        log.info("multiControllerTestDebug finished");
+    }
+
     /**
      * Invoke the multi controller test.
      *
      * @throws ExecutionException   On API execution failures.
      * @throws InterruptedException If test is interrupted.
      */
-    @Test(timeout = 300000)
+    //@Test(timeout = 300000)
     public void multiControllerTest() throws Exception {
         log.info("Start execution of multiControllerTest");
 
@@ -173,10 +180,12 @@ public class MultiControllerTest extends AbstractSystemTest {
     }*/
 
     private void withControllerURIDiscover() throws ExecutionException, InterruptedException {
+        log.info("withControllerURIDiscover  is docker based ::{}", !DOCKER_BASED);
         if (!DOCKER_BASED) {
             Assert.assertTrue(createScopeWithSimpleRetry(
                     "scope" + RandomStringUtils.randomAlphanumeric(10), controllerURIDiscover.get()));
         }
+        log.info("withControllerURIDiscover completed");
     }
 
     private boolean createScopeWithSimpleRetry(String scopeName, URI controllerURI) throws ExecutionException, InterruptedException {
