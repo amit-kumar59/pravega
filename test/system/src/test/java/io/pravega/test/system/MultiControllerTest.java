@@ -93,13 +93,13 @@ public class MultiControllerTest extends AbstractSystemTest {
 
         if (Utils.TLS_AND_AUTH_ENABLED) {
             controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
-            //controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+            controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
         } else {
             // use the last two uris
             controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
             log.info("Controller Service direct URI: {}", controllerURIDirect);
+            controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
         }
-        controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
         log.info("Controller Service discovery URI: {}", controllerURIDiscover);
         segmentStoreService = Utils.createPravegaSegmentStoreService(zkUris.get(0), controllerService.getServiceDetails().get(0));
     }
@@ -179,19 +179,22 @@ public class MultiControllerTest extends AbstractSystemTest {
     }
 
     private boolean createScopeWithSimpleRetry(String scopeName, URI controllerURI) throws ExecutionException, InterruptedException {
+        log.info("createScopeWithSImpleRetry scopeName ::{} controllerURI ::{}", scopeName, controllerURI);
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
+        log.info("ClientConfig4 :{}", clientConfig);
 
         // Need to retry since there is a delay for the mesos DNS name to resolve correctly.
         @Cleanup
         final ControllerImpl controllerClient = new ControllerImpl(ControllerImplConfig.builder()
                 .clientConfig(clientConfig)
                 .build(), executorService);
+        log.info("ControllerClient ::{}", controllerClient);
 
         CompletableFuture<Boolean> retryResult = Retry.withExpBackoff(500, 2, 10, 5000)
                 .retryingOn(Exception.class)
                 .throwingOn(IllegalArgumentException.class)
                 .runAsync(() -> controllerClient.createScope(scopeName), executorService);
-
+        log.info("createScopeWithSImpleRetry result ::{}", retryResult.get());
         return retryResult.get();
     }
 
