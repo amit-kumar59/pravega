@@ -521,7 +521,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         log.info("Test Executed successfully");
     }
 
-    @Test
+    @Test(timeout = 600000)
     public void controllerRestartCBRTest() throws Exception {
         Random random = RandomFactory.create();
         String scope = "controllerRestartScope" + random.nextInt(Integer.MAX_VALUE);
