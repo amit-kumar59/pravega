@@ -1114,19 +1114,24 @@ public class ControllerImpl implements Controller {
 
     @Override
     public CompletableFuture<Map<Segment, Long>> getSegmentsAtTime(final Stream stream, final long timestamp) {
+        log.info("getSegmentsAtTime stream::{} timestamp :{}", stream, timestamp);
         Exceptions.checkNotClosed(closed.get(), this);
         Preconditions.checkNotNull(stream, "stream");
         long traceId = LoggerHelpers.traceEnter(log, "getSegmentsAtTime", stream, timestamp);
         final long requestId = requestIdGenerator.get();
 
+        log.info("getSegmentsAtTime traceId :{} requestId :{}", traceId, requestId);
         final CompletableFuture<SegmentsAtTime> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<SegmentsAtTime> callback = new RPCAsyncCallback<>(traceId, "getSegmentsAtTime", 
                     stream, timestamp);
             StreamInfo streamInfo = ModelHelper.createStreamInfo(stream.getScope(), stream.getStreamName(), AccessOperation.NONE);
+            log.info("getSegmentsAtTime streamInfo :{}", streamInfo);
             GetSegmentsRequest request = GetSegmentsRequest.newBuilder()
                     .setStreamInfo(streamInfo)
                     .setTimestamp(timestamp)
                     .build();
+            log.info("getSegmentsAtTime request ::{}", request);
+
             client.withDeadlineAfter(timeoutMillis, TimeUnit.MILLISECONDS).getSegments(request, callback);
             new ControllerClientTagger(client, timeoutMillis).withTag(requestId, GET_SEGMENTS, 
                     streamInfo.getScope(), streamInfo.getStream()).getSegments(request, callback);
