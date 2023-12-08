@@ -592,7 +592,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         // Subscriber lower bound is 0/60, truncation should happen at this point
         AssertExtensions.assertEventuallyEquals("Truncation did not take place at offset 60.", true, () -> controller.getSegmentsAtTime(
                         new StreamImpl(scope, stream), 0L).join().values().stream().anyMatch(off -> off == 60),
-                5000,  2 * 60 * 1000L);
+                30000, 5 * 60 * 1000L);
         log.info("Test Executed successfully");
     }
 
@@ -681,7 +681,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         readerGroup.updateRetentionStreamCut(streamCuts2);
         AssertExtensions.assertEventuallyEquals("Truncation did not take place.", true, () -> controller.getSegmentsAtTime(
                         stream, 0L).join().equals(streamCuts2.values().stream().findFirst().get().asImpl().getPositions()),
-                30000, 5 * 60 * 1000L);
+                5000, 2 * 60 * 1000L);
         log.info("streamScalingCBRTest executed successfully");
     }
 
