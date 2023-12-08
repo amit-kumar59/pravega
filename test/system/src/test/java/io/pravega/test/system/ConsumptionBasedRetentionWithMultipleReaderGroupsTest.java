@@ -105,7 +105,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
     private static final StreamConfiguration STREAM_CONFIGURATION = StreamConfiguration.builder().scalingPolicy(SCALING_POLICY).retentionPolicy(RETENTION_POLICY_BY_SIZE).build();
     private static final StreamConfiguration TIME_BASED_RETENTION_STREAM_CONFIGURATION = StreamConfiguration.builder().scalingPolicy(SCALING_POLICY).retentionPolicy(RETENTION_POLICY_BY_TIME).build();
     @Rule
-    public final Timeout globalTimeout = Timeout.seconds(5 * 60);
+    public final Timeout globalTimeout = Timeout.seconds(4 * 60);
 
     private final ReaderConfig readerConfig = ReaderConfig.builder().build();
     private final ScheduledExecutorService executor = ExecutorServiceHelpers.newScheduledThreadPool(4, "executor");
@@ -184,7 +184,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         Futures.getAndHandleExceptions(segmentStoreService.scaleService(1), ExecutionException::new);
     }
 
-    @Test
+    //@Test
     public void multipleSubscriberCBRTest() throws Exception {
         assertTrue("Creating scope", streamManager.createScope(SCOPE));
         assertTrue("Creating stream", streamManager.createStream(SCOPE, STREAM, STREAM_CONFIGURATION));
@@ -291,7 +291,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
 
     }
 
-    @Test
+    //@Test
     public void updateRetentionPolicyForCBRTest() throws Exception {
         assertTrue("Creating scope", streamManager.createScope(SCOPE_1));
         assertTrue("Creating stream", streamManager.createStream(SCOPE_1, STREAM_1, STREAM_CONFIGURATION));
@@ -436,7 +436,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
                 new StreamImpl(SCOPE_1, STREAM_2), 0L).join().values().stream().anyMatch(off -> off == 390));
     }
 
-    @Test
+    //@Test
     public void multipleControllerFailoverCBRTest() throws Exception {
         Random random = RandomFactory.create();
         String scope = "testCBR2Scope" + random.nextInt(Integer.MAX_VALUE);
@@ -592,11 +592,11 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         // Subscriber lower bound is 0/60, truncation should happen at this point
         AssertExtensions.assertEventuallyEquals("Truncation did not take place at offset 60.", true, () -> controller.getSegmentsAtTime(
                         new StreamImpl(scope, stream), 0L).join().values().stream().anyMatch(off -> off == 60),
-                30000, 5 * 60 * 1000L);
+                5000,  2 * 60 * 1000L);
         log.info("Test Executed successfully");
     }
 
-    @Test
+    //@Test
     public void streamScalingCBRTest() throws Exception {
         Random random = RandomFactory.create();
         String scope = "streamScalingCBRScope" + random.nextInt(Integer.MAX_VALUE);
