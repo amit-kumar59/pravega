@@ -184,7 +184,9 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 scheduleDiscovery = false;
                 // Use the bootstrapped server list as the final set of controllers.
                 for (InetSocketAddress address : bootstrapServers) {
+                    log.info("address :::{} checkValid host or not ::{}", address.getHostString(), InetAddresses.isInetAddress(address.getHostString()));
                     if (InetAddresses.isInetAddress(address.getHostString())) {
+                        log.info("gethostString ::{} port ::{}", address.getHostString(), address.getPort());
                         servers.add(new EquivalentAddressGroup(
                                 new InetSocketAddress(address.getHostString(), address.getPort())));
                     } else {
@@ -196,6 +198,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
             }
             if (scheduleDiscovery) {
                 // Schedule the first discovery immediately.
+                log.info("From start function calling getcontrollers");
                 this.scheduledFuture = this.scheduledExecutor.schedule(this::getControllers, 0L, TimeUnit.SECONDS);
             } else {
                 log.info("Updating client with controllers: {}", servers);
@@ -232,6 +235,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
                         if (lastUpdateDuration < FAILURE_RETRY_TIMEOUT_MS) {
                             scheduleDelay = FAILURE_RETRY_TIMEOUT_MS - lastUpdateDuration;
                         }
+                        log.info("from refresh function calling get controllers");
                         this.scheduledFuture = this.scheduledExecutor.schedule(
                                 this::getControllers, scheduleDelay, TimeUnit.MILLISECONDS);
                     }
@@ -300,6 +304,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
 
         @Synchronized
         private void updateSchedule(final long nextScheduleTimeMS) {
+            log.info("from updateSchedule calling get controller shutdown status ::{}", !shutdown);
             if (!shutdown) {
                 log.info("Rescheduling ControllerNameResolver task for after {} ms", nextScheduleTimeMS);
                 this.scheduledFuture = this.scheduledExecutor.schedule(
