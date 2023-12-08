@@ -124,31 +124,22 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
     @Environment
     public static void initialize() throws MarathonException {
         URI zkUri = startZookeeperInstance();
-        log.info("zookeeper service details in initialize: {}", zkUri);
         startBookkeeperInstances(zkUri);
         URI controllerUri = ensureControllerRunning(zkUri);
-        log.info("controller uri details in initialize: {}", controllerUri);
         ensureSegmentStoreRunning(zkUri, controllerUri);
     }
 
     @Before
     public void setup() {
         Service zkService = Utils.createZookeeperService();
-        log.info("zkservice details: {}", zkService.getServiceDetails());
-
         assertTrue(zkService.isRunning());
         List<URI> zkUris = zkService.getServiceDetails();
-        log.info("zookeeper service details: {} zkUris :{} ", zkUris, zkUris.get(0));
-
+        log.info("zookeeper service details: {}", zkUris);
         controllerService = Utils.createPravegaControllerService(zkUris.get(0));
         if (!controllerService.isRunning()) {
-            log.info("Controller service is not running ::status{}", controllerService.isRunning());
             controllerService.start(true);
-            log.info("Controller service has started status :{}", controllerService.isRunning());
         }
         List<URI> controllerUris = controllerService.getServiceDetails();
-        log.info("controller URI list is: {}", controllerUris);
-
         // Fetch all the RPC endpoints and construct the client URIs.
         List<String> uris = controllerUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
         log.info("Uri string list :{} size :{}", uris, uris.size());
@@ -158,20 +149,14 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
             controllerURI = URI.create(TCP + String.join(",", uris));
         }
         log.info("controller URI string list  is: {}", controllerURI);
-
         clientConfig = Utils.buildClientConfig(controllerURI);
         log.info("client config is: {}", clientConfig);
-
         controller = new ControllerImpl(ControllerImplConfig.builder()
                 .clientConfig(clientConfig)
                 .maxBackoffMillis(5000).build(), executor);
-        log.info("controller  {}", controller);
-
         streamManager = StreamManager.create(clientConfig);
-        log.info("Stream manager is created: {}", streamManager);
 
         segmentStoreService = Utils.createPravegaSegmentStoreService(zkUris.get(0), controllerURI);
-        log.info("segment store service is started segment StoreService :{}", segmentStoreService);
     }
 
     @After
@@ -184,7 +169,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         Futures.getAndHandleExceptions(segmentStoreService.scaleService(1), ExecutionException::new);
     }
 
-    //@Test
+    @Test
     public void multipleSubscriberCBRTest() throws Exception {
         assertTrue("Creating scope", streamManager.createScope(SCOPE));
         assertTrue("Creating stream", streamManager.createStream(SCOPE, STREAM, STREAM_CONFIGURATION));
@@ -291,7 +276,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
 
     }
 
-    //@Test
+    @Test
     public void updateRetentionPolicyForCBRTest() throws Exception {
         assertTrue("Creating scope", streamManager.createScope(SCOPE_1));
         assertTrue("Creating stream", streamManager.createStream(SCOPE_1, STREAM_1, STREAM_CONFIGURATION));
@@ -436,7 +421,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
                 new StreamImpl(SCOPE_1, STREAM_2), 0L).join().values().stream().anyMatch(off -> off == 390));
     }
 
-    //@Test
+    @Test
     public void multipleControllerFailoverCBRTest() throws Exception {
         Random random = RandomFactory.create();
         String scope = "testCBR2Scope" + random.nextInt(Integer.MAX_VALUE);
@@ -596,7 +581,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
         log.info("Test Executed successfully");
     }
 
-    //@Test
+    @Test
     public void streamScalingCBRTest() throws Exception {
         Random random = RandomFactory.create();
         String scope = "streamScalingCBRScope" + random.nextInt(Integer.MAX_VALUE);
@@ -745,29 +730,17 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
             List<URI> controllerUris = controllerService.getServiceDetails();
             log.info("Pravega Controller service  details: {}", controllerUris);
             List<String> uris = controllerUris.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
-
-            log.info("String list uris :{} and its size :{}", uris, uris.size());
-
             assertEquals(instanceCount + " controller instances should be running", instanceCount, uris.size());
-
             if (Utils.TLS_AND_AUTH_ENABLED) {
                 controllerURI = URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT);
             } else {
                 controllerURI = URI.create(TCP + String.join(",", uris));
             }
             log.info("controllerURI 12 :{}", controllerURI);
-
             clientConfig = Utils.buildClientConfig(controllerURI);
-            log.info("clientConfig 12 :{}", clientConfig);
-
             controller = new ControllerImpl(ControllerImplConfig.builder()
                     .clientConfig(clientConfig)
                     .maxBackoffMillis(5000).build(), executor);
-
-            log.info("controller12 :{}", controller);
-
             streamManager = StreamManager.create(clientConfig);
-
-            log.info("streamManager 12 end:{}", streamManager);
         }
 }
