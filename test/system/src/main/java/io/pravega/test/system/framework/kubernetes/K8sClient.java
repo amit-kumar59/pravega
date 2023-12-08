@@ -724,7 +724,7 @@ public class K8sClient {
         } else {
             return status.getContainerStatuses()
                     .stream()
-                    .allMatch(st -> st.getState().getRunning() != null);
+                    .allMatch(st -> st.getState().getRunning() != null && st.getReady());
         }
     }
 

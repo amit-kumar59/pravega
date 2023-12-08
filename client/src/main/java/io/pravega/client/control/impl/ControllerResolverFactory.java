@@ -133,7 +133,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
          *
          * @param authority         The authority string used to create the URI.
          * @param bootstrapServers  The initial set of controller endpoints.
-         * @param enableDiscovery   Whether to use the controller's discovery API.
+         * @param scheme            Whether to use the controller's discovery API.
          * @param executor          The executor to run resolve tasks on.
          */
         @SuppressWarnings("deprecation")
@@ -254,10 +254,15 @@ class ControllerResolverFactory extends NameResolver.Factory {
                     // Make an RPC call to the bootstrapped controller servers to fetch all active controllers.
                     final ServerResponse controllerServerList =
                             this.client.getControllerServerList(ServerRequest.getDefaultInstance());
+
+                    controllerServerList.getNodeURIList().forEach(nodeUri -> log.info("NodeUri ::{} port ::{}", nodeUri.getEndpoint(), nodeUri.getPort()));
+
                     servers = controllerServerList.getNodeURIList().stream()
                             .map(node ->
                                     new EquivalentAddressGroup(new InetSocketAddress(node.getEndpoint(), node.getPort())))
                             .collect(Collectors.toList());
+
+                    servers.stream().forEach(addressGroup -> log.info("equivalentAddressGroup ::{}", addressGroup.toString()));
                 } else {
                     // Resolve the bootstrapped server hostnames to get the set of controllers.
                     servers = new ArrayList<>();
