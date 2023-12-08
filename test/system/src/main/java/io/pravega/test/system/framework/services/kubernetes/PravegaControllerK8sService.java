@@ -83,8 +83,7 @@ public class PravegaControllerK8sService extends AbstractService {
     @Override
     public List<URI> getServiceDetails() {
         //fetch the URI.
-        //String prefix = Utils.TLS_AND_AUTH_ENABLED ? TLS : TCP;
-        String prefix = "pravegas://";
+        String prefix = Utils.TLS_AND_AUTH_ENABLED ? TLS : TCP;
         log.info("uri prefix : {}", prefix);
         String tlsCname = Utils.getConfig("tlsCertCNName", "pravega-pravega-controller");
         log.info("Tls enabled status :{} auth enabled status :{} tls cname :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED, tlsCname);

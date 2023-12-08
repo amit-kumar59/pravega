@@ -113,7 +113,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         }
         builder = webTarget.request();
 
-        log.info("webtarget request::{}", webTarget.request());
+        log.info("webtarget request::{}", builder.toString());
         @Cleanup
         Response response = builder.get();
         assertEquals(String.format("Received unexpected status code: %s in response to 'ping' request.", response.getStatus()),

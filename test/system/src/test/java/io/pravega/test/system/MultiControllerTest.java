@@ -20,6 +20,7 @@ import io.pravega.client.control.impl.ControllerImpl;
 import io.pravega.client.control.impl.ControllerImplConfig;
 import io.pravega.common.concurrent.ExecutorServiceHelpers;
 import io.pravega.common.concurrent.Futures;
+import io.pravega.common.util.RetriesExhaustedException;
 import io.pravega.common.util.Retry;
 import io.pravega.test.common.AssertExtensions;
 import io.pravega.test.system.framework.Environment;
@@ -54,7 +55,7 @@ public class MultiControllerTest extends AbstractSystemTest {
     private final ScheduledExecutorService executorService = ExecutorServiceHelpers.newScheduledThreadPool(1, "test");
     private Service controllerService = null;
     private Service segmentStoreService = null;
-    // private AtomicReference<URI> controllerURIDirect = new AtomicReference<>();
+    private AtomicReference<URI> controllerURIDirect = new AtomicReference<>();
     private AtomicReference<URI> controllerURIDiscover = new AtomicReference<>();
 
     @Environment
@@ -91,15 +92,16 @@ public class MultiControllerTest extends AbstractSystemTest {
         assertEquals("2 controller instances should be running", 2, uris.size());
 
         if (Utils.TLS_AND_AUTH_ENABLED) {
-            //controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+            controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
             controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
         } else {
             // use the last two uris
-            //controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
-            //log.info("Controller Service direct URI: {}", controllerURIDirect);
+            controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
+            log.info("Controller Service direct URI: {}", controllerURIDirect);
             controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
         }
         log.info("Controller Service discovery URI: {}", controllerURIDiscover);
+
         segmentStoreService = Utils.createPravegaSegmentStoreService(zkUris.get(0), controllerService.getServiceDetails().get(0));
     }
 
@@ -111,25 +113,18 @@ public class MultiControllerTest extends AbstractSystemTest {
         segmentStoreService.scaleService(0);
     }
 
-    @Test(timeout = 300000)
-    public void multiControllerTestDebug() throws Exception {
-        log.info("multiControllerTestDebug started");
-        withControllerURIDiscover();
-        log.info("multiControllerTestDebug finished");
-    }
-
     /**
      * Invoke the multi controller test.
      *
      * @throws ExecutionException   On API execution failures.
      * @throws InterruptedException If test is interrupted.
      */
-    //@Test(timeout = 300000)
+    @Test(timeout = 300000)
     public void multiControllerTest() throws Exception {
         log.info("Start execution of multiControllerTest");
 
-        //log.info("Test tcp:// with 2 controller instances running");
-        //withControllerURIDirect();
+        log.info("Test tcp:// with 2 controller instances running");
+        withControllerURIDirect();
         log.info("Test pravega:// with 2 controller instances running");
         log.info("**********before withControllerURIDiscover call***************");
         withControllerURIDiscover();
@@ -137,8 +132,8 @@ public class MultiControllerTest extends AbstractSystemTest {
 
         Futures.getAndHandleExceptions(controllerService.scaleService(1), ExecutionException::new);
 
-        //log.info("Test tcp:// with only 1 controller instance running");
-        //withControllerURIDirect();
+        log.info("Test tcp:// with only 1 controller instance running");
+        withControllerURIDirect();
         log.info("Test pravega:// with only 1 controller instance running");
         withControllerURIDiscover();
         log.info("after with controller uri Discover");
@@ -148,36 +143,37 @@ public class MultiControllerTest extends AbstractSystemTest {
 
         AssertExtensions.assertEventuallyEquals("Problem scaling down the Controller service.", true,
                 () -> controllerService.getServiceDetails().isEmpty(), 1000, 30000);
-        log.info("after assertEventuallyEquals");
-        //controllerURIDirect.set(URI.create("tcp://0.0.0.0:9090"));
-
-        //log.info(" amit controllerURIDirect ::{}", controllerURIDirect.get());
-
-        controllerURIDiscover.set(URI.create("pravega://0.0.0.0:9090"));
+        if (Utils.TLS_AND_AUTH_ENABLED) {
+            controllerURIDirect.set(URI.create("tls://0.0.0.0:9090"));
+            controllerURIDiscover.set(URI.create("pravegas://0.0.0.0:9090"));
+        } else {
+            controllerURIDirect.set(URI.create("tcp://0.0.0.0:9090"));
+            controllerURIDiscover.set(URI.create("pravega://0.0.0.0:9090"));
+        }
         log.info(" amit controllerURIDiscover ::{}", controllerURIDiscover.get());
 
-        /* final ClientConfig clientConfig = Utils.buildClientConfig(controllerURIDirect.get());
+        final ClientConfig clientConfig = Utils.buildClientConfig(controllerURIDirect.get());
         log.info("Test tcp:// with no controller instances running");
         log.info(" amit clientConfig ::{}", clientConfig);
         AssertExtensions.assertThrows("Should throw RetriesExhaustedException",
                 () -> createScope("scope" + RandomStringUtils.randomAlphanumeric(10), clientConfig),
                 throwable -> throwable instanceof RetriesExhaustedException);
 
-        log.info("After assert THrows");
+        log.info("After assert throws");
         if (!DOCKER_BASED) {
             log.info("Test pravega:// with no controller instances running");
             AssertExtensions.assertThrows("Should throw RetriesExhaustedException",
                     () -> createScope("scope" + RandomStringUtils.randomAlphanumeric(10), clientConfig),
                     throwable -> throwable instanceof RetriesExhaustedException);
-        }*/
+        }
 
         log.info("multiControllerTest execution completed");
     }
 
-    /*private void withControllerURIDirect() throws ExecutionException, InterruptedException {
+    private void withControllerURIDirect() throws ExecutionException, InterruptedException {
         Assert.assertTrue(createScopeWithSimpleRetry(
                 "scope" + RandomStringUtils.randomAlphanumeric(10), controllerURIDirect.get()));
-    }*/
+    }
 
     private void withControllerURIDiscover() throws ExecutionException, InterruptedException {
         log.info("withControllerURIDiscover  is docker based ::{}", !DOCKER_BASED);

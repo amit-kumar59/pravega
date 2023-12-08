@@ -81,7 +81,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
             return InetSocketAddress.createUnresolved(strings[0], Integer.parseInt(strings[1]));
         }).collect(Collectors.toList());
 
-        return new ControllerNameResolver(authority, addresses, SCHEME_DISCOVER.equals(scheme) || SCHEME_DISCOVER_TLS.equals(scheme), executor);
+        return new ControllerNameResolver(authority, addresses, scheme, executor);
     }
 
     @Override
@@ -138,13 +138,16 @@ class ControllerResolverFactory extends NameResolver.Factory {
          */
         @SuppressWarnings("deprecation")
         ControllerNameResolver(final String authority, final List<InetSocketAddress> bootstrapServers,
-                               final boolean enableDiscovery, ScheduledExecutorService executor) {
+                               final String scheme, ScheduledExecutorService executor) {
             this.authority = authority;
             this.bootstrapServers = ImmutableList.copyOf(bootstrapServers);
-            this.enableDiscovery = enableDiscovery;
+            this.enableDiscovery = SCHEME_DISCOVER.equals(scheme) || SCHEME_DISCOVER_TLS.equals(scheme);
+            String connectString = "tcp";
+            if (SCHEME_DISCOVER_TLS.equals(scheme)) {
+                connectString = "tls://";
+            }
             if (this.enableDiscovery) {
                 // We will use the direct scheme to send the discovery RPC request to the controller bootstrap servers.
-                String connectString = "tcp://";
                 final List<String> strings = this.bootstrapServers.stream()
                         .map(server -> server.getHostString() + ":" + server.getPort())
                         .collect(Collectors.toList());
