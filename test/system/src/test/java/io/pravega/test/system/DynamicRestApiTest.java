@@ -106,14 +106,23 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         log.info("ResourceURI::{}", resourceURl);
 
         webTarget = client.target(resourceURl);
-        if (Utils.TLS_AND_AUTH_ENABLED) {
-            webTarget.resolveTemplate("disableCNCheck", "false");
-            // Set the path to the CA certificate
-            System.setProperty("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.key.pem");
-        }
         builder = webTarget.request();
 
-        log.info("webtarget request::{}", builder.toString());
+        log.info("tls enable status ::{}", Utils.TLS_AND_AUTH_ENABLED);
+
+        if (Utils.TLS_AND_AUTH_ENABLED) {
+            //webTarget.resolveTemplate("disableCNCheck", "false");
+            // Set the path to the CA certificate
+            //System.setProperty("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.key.pem");
+
+            String username = "admin";
+            String password = "1111_aaaa";
+            String credentials = username + ":" + password;
+            String encodedString = java.util.Base64.getEncoder().encodeToString(credentials.getBytes());
+            builder = builder.header("Authorization", "Basic " + encodedString);
+            log.info("webtarget request1::{}", builder.buildGet().toString());
+        }
+        log.info("webtarget request2::{}", builder.buildGet().toString());
         @Cleanup
         Response response = builder.get();
         assertEquals(String.format("Received unexpected status code: %s in response to 'ping' request.", response.getStatus()),
@@ -121,6 +130,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
                 response.getStatus());
 
         log.info("response status ::{}", response);
+        log.info("response status ::{}", response.getStatus());
 
         final String scope1 = RandomStringUtils.randomAlphanumeric(10);
         final String stream1 = RandomStringUtils.randomAlphanumeric(10);
