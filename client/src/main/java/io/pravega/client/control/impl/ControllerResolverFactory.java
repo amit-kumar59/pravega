@@ -142,7 +142,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
             this.authority = authority;
             this.bootstrapServers = ImmutableList.copyOf(bootstrapServers);
             this.enableDiscovery = SCHEME_DISCOVER.equals(scheme) || SCHEME_DISCOVER_TLS.equals(scheme);
-            String connectString = "tcp";
+            String connectString = "tcp://";
             if (SCHEME_DISCOVER_TLS.equals(scheme)) {
                 connectString = "tls://";
             }
@@ -196,6 +196,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
             } else {
                 scheduleDiscovery = true;
             }
+            log.info("scheduleDiscovery::{}", scheduleDiscovery);
             if (scheduleDiscovery) {
                 // Schedule the first discovery immediately.
                 log.info("From start function calling getcontrollers");
@@ -254,29 +255,38 @@ class ControllerResolverFactory extends NameResolver.Factory {
             final List<EquivalentAddressGroup> servers;
             long nextScheduleTimeMS = REFRESH_INTERVAL_MS;
             try {
+                log.info("getControllers enableDiscovery {}", this.enableDiscovery);
                 if (this.enableDiscovery) {
                     // Make an RPC call to the bootstrapped controller servers to fetch all active controllers.
+                    log.info("Server request get default instance ::{}", ServerRequest.getDefaultInstance().getDefaultInstanceForType());
                     final ServerResponse controllerServerList =
                             this.client.getControllerServerList(ServerRequest.getDefaultInstance());
 
-                    controllerServerList.getNodeURIList().forEach(nodeUri -> log.info("NodeUri ::{} port ::{}", nodeUri.getEndpoint(), nodeUri.getPort()));
+                    log.info("if block controllerServerLIst::{}", controllerServerList.getNodeURICount());
+
+                    controllerServerList.getNodeURIList().stream().forEach(nodeUri -> log.info("NodeUri if block::{} port ::{}", nodeUri.getEndpoint(), nodeUri.getPort()));
 
                     servers = controllerServerList.getNodeURIList().stream()
                             .map(node ->
                                     new EquivalentAddressGroup(new InetSocketAddress(node.getEndpoint(), node.getPort())))
                             .collect(Collectors.toList());
-
+                    log.info("getControllers if block servers size :{}", servers.size());
                     servers.stream().forEach(addressGroup -> log.info("equivalentAddressGroup ::{}", addressGroup.toString()));
                 } else {
+                    log.info("getControllers servers else block servers");
                     // Resolve the bootstrapped server hostnames to get the set of controllers.
                     servers = new ArrayList<>();
                     this.bootstrapServers.forEach(address -> {
                         final InetSocketAddress socketAddress = new InetSocketAddress(address.getHostString(),
                                 address.getPort());
+                        log.info("getControllers else block address :{}", socketAddress.getAddress());
                         if (!socketAddress.isUnresolved()) {
+                            log.info("getControllers  else block socket address :{} port :{} hostname :{}", socketAddress.getHostString(), socketAddress.getPort(), socketAddress.getHostName());
                             servers.add(new EquivalentAddressGroup(socketAddress));
                         }
                     });
+                    log.info("getControllers servers else block servers size :{}", servers.size());
+
                 }
 
                 // Update gRPC load balancer with the new set of server addresses.
