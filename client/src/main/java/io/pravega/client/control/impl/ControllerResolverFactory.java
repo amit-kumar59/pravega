@@ -72,7 +72,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
         final String scheme = targetUri.getScheme();
 
         final String authority = targetUri.getAuthority();
-        log.info("Amit scheme ::{} authority ::{}", scheme, authority);
+        log.info("Amit scheme ::{} authority ::{} targetUri::{}", scheme, authority, targetUri);
 
         final List<InetSocketAddress> addresses = Splitter.on(',').splitToList(authority).stream().map(host -> {
             final String[] strings = host.split(":");
@@ -139,9 +139,11 @@ class ControllerResolverFactory extends NameResolver.Factory {
         @SuppressWarnings("deprecation")
         ControllerNameResolver(final String authority, final List<InetSocketAddress> bootstrapServers,
                                final String scheme, ScheduledExecutorService executor) {
+            log.info("ControllerNameResolver scheme ::{}", scheme);
             this.authority = authority;
             this.bootstrapServers = ImmutableList.copyOf(bootstrapServers);
             this.enableDiscovery = SCHEME_DISCOVER.equals(scheme) || SCHEME_DISCOVER_TLS.equals(scheme);
+            log.info("ControllerNameResolver enableDiscovery ::{}", this.enableDiscovery);
             String connectString = "tcp://";
             if (SCHEME_DISCOVER_TLS.equals(scheme)) {
                 connectString = "tls://";
@@ -160,6 +162,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
                         .usePlaintext()
                         .build());
             } else {
+                log.info("ControllerNameResolver else");
                 this.client = null;
             }
 

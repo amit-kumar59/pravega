@@ -264,6 +264,8 @@ public class ControllerImpl implements Controller {
                                 .keepAliveTime(DEFAULT_KEEPALIVE_TIME_MINUTES, TimeUnit.MINUTES),
                 config, executor, null);
         log.info("Controller client connecting to server at {}", config.getClientConfig().getControllerURI().getAuthority());
+        log.info("Controller client connecting to clientConfig controller uri : {}", config.getClientConfig().getControllerURI().toString());
+        log.info("Controller client connecting to server scheme : {}", config.getClientConfig().getControllerURI().getScheme());
     }
 
     /**

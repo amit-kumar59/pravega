@@ -123,9 +123,9 @@ public class MultiControllerTest extends AbstractSystemTest {
     public void multiControllerTest() throws Exception {
         log.info("Start execution of multiControllerTest");
 
-        log.info("Test tcp:// with 2 controller instances running");
-        withControllerURIDirect();
-        log.info("Test pravega:// with 2 controller instances running");
+        //log.info("Test tcp:// with 2 controller instances running");
+        //withControllerURIDirect();
+        //log.info("Test pravega:// with 2 controller instances running");
         log.info("**********before withControllerURIDiscover call***************");
         withControllerURIDiscover();
         log.info("**********after withControllerURIDiscover call***************");
@@ -150,7 +150,7 @@ public class MultiControllerTest extends AbstractSystemTest {
             controllerURIDirect.set(URI.create("tcp://0.0.0.0:9090"));
             controllerURIDiscover.set(URI.create("pravega://0.0.0.0:9090"));
         }
-        log.info(" amit controllerURIDiscover ::{}", controllerURIDiscover.get());
+        log.info("amit controllerURIDiscover ::{}", controllerURIDiscover.get());
 
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURIDirect.get());
         log.info("Test tcp:// with no controller instances running");

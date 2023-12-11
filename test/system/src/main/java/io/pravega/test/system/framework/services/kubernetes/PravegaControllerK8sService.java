@@ -89,7 +89,6 @@ public class PravegaControllerK8sService extends AbstractService {
         log.info("Tls enabled status :{} auth enabled status :{} tls cname :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED, tlsCname);
         List<V1PodStatus> viPodsList = k8sClient.getStatusOfPodWithLabel(NAMESPACE, "component", PRAVEGA_CONTROLLER_LABEL).join();
         log.info("Pods list size:: {} and pods  list details :: {}", viPodsList.size(), viPodsList);
-        log.info("Pods vi pod :: {}", viPodsList.get(0).getPodIP());
 
         List<URI> uriList = Futures.getAndHandleExceptions(k8sClient.getStatusOfPodWithLabel(NAMESPACE, "component", PRAVEGA_CONTROLLER_LABEL)
                        .thenApply(statuses -> statuses.stream()
