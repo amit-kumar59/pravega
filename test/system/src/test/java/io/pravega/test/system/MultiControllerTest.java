@@ -27,6 +27,8 @@ import io.pravega.test.system.framework.Environment;
 import io.pravega.test.system.framework.SystemTestRunner;
 import io.pravega.test.system.framework.Utils;
 import io.pravega.test.system.framework.services.Service;
+
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -93,7 +95,12 @@ public class MultiControllerTest extends AbstractSystemTest {
 
         if (Utils.TLS_AND_AUTH_ENABLED) {
             controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
-            controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+            String hostString = "pravega-pravega-controller";
+            final InetSocketAddress socketAddress = new InetSocketAddress(hostString, CONTROLLER_GRPC_PORT);
+            boolean isUnResolved = socketAddress.isUnresolved();
+            log.info("socketAddress ::{} isUnResolved :{}", socketAddress.getAddress(), isUnResolved);
+            //controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+            controllerURIDiscover.set(URI.create("pravegas://" + socketAddress.getAddress() + ":" + CONTROLLER_GRPC_PORT));
         } else {
             // use the last two uris
             controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
@@ -123,9 +130,9 @@ public class MultiControllerTest extends AbstractSystemTest {
     public void multiControllerTest() throws Exception {
         log.info("Start execution of multiControllerTest");
 
-        //log.info("Test tcp:// with 2 controller instances running");
-        //withControllerURIDirect();
-        //log.info("Test pravega:// with 2 controller instances running");
+        log.info("Test tcp:// with 2 controller instances running");
+        withControllerURIDirect();
+        log.info("Test pravega:// with 2 controller instances running");
         log.info("**********before withControllerURIDiscover call***************");
         withControllerURIDiscover();
         log.info("**********after withControllerURIDiscover call***************");
