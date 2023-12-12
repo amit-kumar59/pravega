@@ -153,8 +153,8 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 final List<String> strings = this.bootstrapServers.stream()
                         .map(server -> server.getHostString() + ":" + server.getPort())
                         .collect(Collectors.toList());
-                //connectString = connectString + String.join(",", strings);
-                connectString = "pravegas://" + String.join(",", strings);
+                connectString = connectString + String.join(",", strings);
+                //connectString = "pravegas://" + String.join(",", strings);
                 log.info("Connection string :: {}", connectString);
                 this.client = ControllerServiceGrpc.newBlockingStub(ManagedChannelBuilder
                         .forTarget(connectString)
