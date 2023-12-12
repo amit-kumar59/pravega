@@ -97,10 +97,10 @@ public class MultiControllerTest extends AbstractSystemTest {
             controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
             String hostString = "pravega-pravega-controller";
             final InetSocketAddress socketAddress = new InetSocketAddress(hostString, CONTROLLER_GRPC_PORT);
-            boolean isUnResolved = socketAddress.isUnresolved();
-            log.info("socketAddress ::{} isUnResolved :{}", socketAddress.getAddress(), isUnResolved);
+            String[] sockAddressSplit = socketAddress.getAddress().toString().split("/");
+            log.info("socketAddress ::{} isUnResolved :{} Ip :{}", socketAddress.getAddress(), socketAddress.isUnresolved(), sockAddressSplit[1]);
             //controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
-            controllerURIDiscover.set(URI.create("pravegas://" + socketAddress.getAddress() + ":" + CONTROLLER_GRPC_PORT));
+            controllerURIDiscover.set(URI.create("pravegas://" + sockAddressSplit[1] + ":" + CONTROLLER_GRPC_PORT));
         } else {
             // use the last two uris
             controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
