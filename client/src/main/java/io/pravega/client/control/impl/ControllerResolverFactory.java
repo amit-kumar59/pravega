@@ -128,6 +128,8 @@ class ControllerResolverFactory extends NameResolver.Factory {
         @GuardedBy("$lock")
         private boolean shutdown = false;
 
+        private String scheme;
+
         /**
          * Creates the NameResolver instance.
          *
@@ -143,6 +145,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
             this.authority = authority;
             this.bootstrapServers = ImmutableList.copyOf(bootstrapServers);
             this.enableDiscovery = SCHEME_DISCOVER.equals(scheme) || SCHEME_DISCOVER_TLS.equals(scheme);
+            this.scheme = scheme;
             log.info("ControllerNameResolver enableDiscovery ::{}", this.enableDiscovery);
             String connectString = "tcp://";
             if (SCHEME_DISCOVER_TLS.equals(scheme)) {
@@ -259,8 +262,8 @@ class ControllerResolverFactory extends NameResolver.Factory {
             final List<EquivalentAddressGroup> servers;
             long nextScheduleTimeMS = REFRESH_INTERVAL_MS;
             try {
-                log.info("getControllers enableDiscovery {}", this.enableDiscovery);
-                if (this.enableDiscovery) {
+                log.info("getControllers enableDiscovery {} scheme ::{}", this.enableDiscovery, scheme);
+                if (this.enableDiscovery && !this.scheme.equals("pravegas")) {
                     // Make an RPC call to the bootstrapped controller servers to fetch all active controllers.
                     log.info("Server request get default instance ::{}", ServerRequest.getDefaultInstance().getDefaultInstanceForType());
                     final ServerResponse controllerServerList =
