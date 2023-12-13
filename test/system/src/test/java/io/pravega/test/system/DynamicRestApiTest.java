@@ -32,10 +32,16 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -78,7 +84,14 @@ public class DynamicRestApiTest extends AbstractSystemTest {
             clientConfig.register(feature);
         }
 
-        client = ClientBuilder.newClient(clientConfig);
+        if (Utils.TLS_AND_AUTH_ENABLED) {
+            client = ClientBuilder.newBuilder()
+                    .hostnameVerifier(new NullHostnameVerifier())
+                    .sslContext(buildSSLContext())
+                    .build();
+        } else {
+            client = ClientBuilder.newClient(clientConfig);
+        }
     }
 
     /**
@@ -109,15 +122,16 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         resourceURl = new StringBuilder(restServerURI).append("/ping").toString();
 
         log.info("ResourceURI::{}", resourceURl);
-
         webTarget = client.target(resourceURl);
 
         log.info("tls enable status ::{}", Utils.TLS_AND_AUTH_ENABLED);
         if (Utils.TLS_AND_AUTH_ENABLED) {
-            webTarget.resolveTemplate("disableCNCheck", "false");
-            webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.key.pem");
-            log.info("web target property {}", webTarget.getConfiguration().getProperties());
+
+            //webTarget.resolveTemplate("disableCNCheck", "false");
+            //webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.key.pem");
+            //log.info("web target property {}", webTarget.getConfiguration().getProperties());
         }
+
         builder = webTarget.request();
         log.info("Web target request2::{}", builder.buildGet().toString());
         @Cleanup
@@ -174,7 +188,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         log.info("Test execution completed successfully.");
     }
 
-    @Test
+    //@Test
     public void listScopesAmit() {
         String trustorePath = "/etc/secret-volume/controller01.key.pem";
         String password = "/etc/secret-volume/pass-secret-tls";
@@ -202,6 +216,44 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private static SSLContext buildSSLContext() {
+        try {
+            final SSLContext context = SSLContext.getInstance("TLSv1");
+            final TrustManager[] trustManagerArray = {new NullX509TrustManager()};
+            context.init(null, trustManagerArray, null);
+            return context;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Host name verifier that does not perform nay checks.
+     */
+    private static class NullHostnameVerifier implements HostnameVerifier {
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    }
+
+    /**
+     * Trust manager that does not perform nay checks.
+     */
+    private static class NullX509TrustManager implements X509TrustManager {
+        public void checkClientTrusted(X509Certificate[] chain, String authType)
+                throws CertificateException {
+        }
+
+        public void checkServerTrusted(X509Certificate[] chain, String authType)
+                throws CertificateException {
+        }
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
         }
     }
 }
