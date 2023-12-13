@@ -17,33 +17,43 @@ package io.pravega.client.control.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;
 import io.grpc.Attributes;
 import io.grpc.EquivalentAddressGroup;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.NameResolver;
+import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.pravega.controller.stream.api.grpc.v1.Controller.ServerRequest;
 import io.pravega.controller.stream.api.grpc.v1.Controller.ServerResponse;
 import io.pravega.controller.stream.api.grpc.v1.ControllerServiceGrpc;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.net.ssl.SSLException;
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Synchronized;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * gRPC Factory for resolving controller host ips and ports.
@@ -128,6 +138,8 @@ class ControllerResolverFactory extends NameResolver.Factory {
         @GuardedBy("$lock")
         private boolean shutdown = false;
 
+        private ManagedChannel channel;
+
         /**
          * Creates the NameResolver instance.
          *
@@ -156,12 +168,40 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 connectString = connectString + String.join(",", strings);
                 //connectString = "pravegas://" + String.join(",", strings);
                 log.info("Connection string :: {}", connectString);
-                this.client = ControllerServiceGrpc.newBlockingStub(ManagedChannelBuilder
+
+                //TODO-START
+                String tlsMountPath = "/etc/secret-volume";
+                String defaultTrusStorePath = tlsMountPath + "/tls.crt";
+                log.info("DEFAULT_TRUSTSTORE_PATH::{}", defaultTrusStorePath);
+
+                SslContextBuilder sslContextBuilder;
+                String trustStore = defaultTrusStorePath;
+                log.info("TrustStore path ::{}", trustStore);
+
+                sslContextBuilder = GrpcSslContexts.forClient();
+                log.info("sslContextBuilder ::{}", sslContextBuilder);
+
+                ManagedChannelBuilder channelBuilder;
+                if (!Strings.isNullOrEmpty(trustStore)) {
+                    sslContextBuilder = sslContextBuilder.trustManager(new File(trustStore));
+                }
+                try {
+                    channelBuilder = ((NettyChannelBuilder) ManagedChannelBuilder.forTarget(connectString)).sslContext(sslContextBuilder.build())
+                            .negotiationType(NegotiationType.TLS);
+                    this.channel = channelBuilder.build();
+
+                } catch (SSLException e) {
+                    throw new CompletionException(e);
+                }
+                this.client = ControllerServiceGrpc.newBlockingStub(this.channel);
+                log.info("Amit todo - end client :{}", client);
+                //TODO-END
+                /* this.client = ControllerServiceGrpc.newBlockingStub(ManagedChannelBuilder
                         .forTarget(connectString)
                         .nameResolverFactory(new ControllerResolverFactory(executor))
                         .defaultLoadBalancingPolicy("round_robin")
                         .usePlaintext()
-                        .build());
+                        .build());*/
             } else {
                 log.info("ControllerNameResolver else");
                 this.client = null;
@@ -328,5 +368,6 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 this.lastUpdateTimeMS = System.currentTimeMillis();
             }
         }
+
     }
 }
