@@ -85,9 +85,10 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         }
 
         if (Utils.TLS_AND_AUTH_ENABLED) {
+            clientConfig.property("sun.net.http.allowRestrictedHeaders", "false");
             client = ClientBuilder.newBuilder()
                     .hostnameVerifier(new NullHostnameVerifier())
-                    .sslContext(buildSSLContext())
+                    .sslContext(ClientBuilder.newClient(clientConfig).getSslContext())
                     .build();
         } else {
             client = ClientBuilder.newClient(clientConfig);
@@ -221,7 +222,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
 
     private static SSLContext buildSSLContext() {
         try {
-            final SSLContext context = SSLContext.getInstance("TLSv1");
+            final SSLContext context = SSLContext.getInstance("TLSv1.2");
             final TrustManager[] trustManagerArray = {new NullX509TrustManager()};
             context.init(null, trustManagerArray, null);
             return context;
