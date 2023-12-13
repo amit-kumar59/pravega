@@ -89,6 +89,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
             client = ClientBuilder.newBuilder()
                     .hostnameVerifier(new NullHostnameVerifier())
                     .sslContext(buildSSLContext())
+                    .withConfig(clientConfig)
                     .build();
         } else {
             client = ClientBuilder.newClient(clientConfig);
