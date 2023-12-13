@@ -34,6 +34,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.pravega.controller.stream.api.grpc.v1.Controller.ServerRequest;
 import io.pravega.controller.stream.api.grpc.v1.Controller.ServerResponse;
 import io.pravega.controller.stream.api.grpc.v1.ControllerServiceGrpc;
+import io.pravega.shared.controller.tracing.RPCTracingHelpers;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
@@ -188,6 +189,8 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 try {
                     channelBuilder = ((NettyChannelBuilder) ManagedChannelBuilder.forTarget(connectString)).sslContext(sslContextBuilder.build())
                             .negotiationType(NegotiationType.TLS);
+                    // Trace channel.
+                    channelBuilder = channelBuilder.intercept(RPCTracingHelpers.getClientInterceptor());
                     this.channel = channelBuilder.build();
 
                 } catch (SSLException e) {
