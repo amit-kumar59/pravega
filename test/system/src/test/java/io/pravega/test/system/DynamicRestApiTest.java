@@ -128,7 +128,8 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         if (Utils.TLS_AND_AUTH_ENABLED) {
             webTarget.resolveTemplate("disableCNCheck", "false");
             //webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.key.pem");
-            webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/tls.crt");
+            //webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/tls.crt");
+            webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.pem");
             log.info("web target property {}", webTarget.getConfiguration().getProperties());
         }
 
