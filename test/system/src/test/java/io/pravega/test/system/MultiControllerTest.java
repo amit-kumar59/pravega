@@ -119,7 +119,7 @@ public class MultiControllerTest extends AbstractSystemTest {
      * @throws ExecutionException   On API execution failures.
      * @throws InterruptedException If test is interrupted.
      */
-    @Test(timeout = 600000)
+    @Test(timeout = 300000)
     public void multiControllerTest() throws Exception {
         log.info("Start execution of multiControllerTest");
 
