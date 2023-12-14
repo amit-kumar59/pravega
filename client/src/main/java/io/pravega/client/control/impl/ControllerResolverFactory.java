@@ -83,13 +83,12 @@ class ControllerResolverFactory extends NameResolver.Factory {
     @Override
     public NameResolver newNameResolver(URI targetUri, NameResolver.Args params) {
         final String scheme = targetUri.getScheme();
-
         final String authority = targetUri.getAuthority();
-        log.info("Amit scheme ::{} authority ::{} targetUri::{}", scheme, authority, targetUri);
+        log.info("newNameResolver scheme ::{} authority ::{} targetUri::{}", scheme, authority, targetUri);
 
         final List<InetSocketAddress> addresses = Splitter.on(',').splitToList(authority).stream().map(host -> {
             final String[] strings = host.split(":");
-            log.info("Amit strings ::{}", Arrays.toString(strings));
+            log.info("host Strings arr::{}", Arrays.toString(strings));
             Preconditions.checkArgument(strings.length == 2, "URI should have both address and port");
             return InetSocketAddress.createUnresolved(strings[0], Integer.parseInt(strings[1]));
         }).collect(Collectors.toList());
@@ -175,11 +174,9 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 //TODO-START
                 String tlsMountPath = "/etc/secret-volume";
                 String defaultTrusStorePath = tlsMountPath + "/tls.crt";
-                log.info("DEFAULT_TRUSTSTORE_PATH::{}", defaultTrusStorePath);
-
                 SslContextBuilder sslContextBuilder;
                 String trustStore = defaultTrusStorePath;
-                log.info("TrustStore path ::{}", trustStore);
+                log.info("Default TrustStore path ::{}", trustStore);
 
                 sslContextBuilder = GrpcSslContexts.forClient();
                 log.info("sslContextBuilder ::{}", sslContextBuilder);
@@ -198,6 +195,8 @@ class ControllerResolverFactory extends NameResolver.Factory {
                             .forTarget(connectString)
                             .nameResolverFactory(new ControllerResolverFactory(executor))
                             .defaultLoadBalancingPolicy("round_robin")
+                            .directExecutor()
+                            .keepAliveTime(6, TimeUnit.MINUTES)
                             //.usePlaintext()
                             .build();
                 } catch (SSLException e) {
@@ -206,7 +205,7 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 DefaultCredentials credentials = new DefaultCredentials("1111_aaaa", "admin");
                 this.client = ControllerServiceGrpc.newBlockingStub(this.channel)
                         .withCallCredentials(MoreCallCredentials.from(new PravegaCredentialsWrapper(credentials)));
-                log.info("Amit todo - end client :{}", client);
+                log.info("ControllerNameResolver client :{}", this.client.toString());
                 //TODO-END
                 /* this.client = ControllerServiceGrpc.newBlockingStub(ManagedChannelBuilder
                         .forTarget(connectString)
@@ -315,6 +314,9 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 if (this.enableDiscovery) {
                     // Make an RPC call to the bootstrapped controller servers to fetch all active controllers.
                     log.info("Server request get default instance ::{}", ServerRequest.getDefaultInstance().getDefaultInstanceForType());
+                    log.info("getController client details ::{}", this.client.toString());
+                    log.info("getController channel details ::{}", this.client.getChannel().toString());
+
                     final ServerResponse controllerServerList =
                             this.client.getControllerServerList(ServerRequest.getDefaultInstance());
 
