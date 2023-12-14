@@ -28,7 +28,6 @@ import io.pravega.test.system.framework.SystemTestRunner;
 import io.pravega.test.system.framework.Utils;
 import io.pravega.test.system.framework.services.Service;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -95,20 +94,14 @@ public class MultiControllerTest extends AbstractSystemTest {
 
         if (Utils.TLS_AND_AUTH_ENABLED) {
             controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
-            String hostString = "pravega-pravega-controller";
-            final InetSocketAddress socketAddress = new InetSocketAddress(hostString, CONTROLLER_GRPC_PORT);
-            String[] sockAddressSplit = socketAddress.getAddress().toString().split("/");
-            log.info("socketAddress ::{} isUnResolved :{} Ip :{}", socketAddress.getAddress(), socketAddress.isUnresolved(), sockAddressSplit[1]);
-            //controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
-            controllerURIDiscover.set(URI.create("pravegas://" + sockAddressSplit[1] + ":" + CONTROLLER_GRPC_PORT));
+            controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
         } else {
             // use the last two uris
             controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
             log.info("Controller Service direct URI: {}", controllerURIDirect);
             controllerURIDiscover.set(URI.create("pravega://" + String.join(",", uris)));
         }
-        log.info("Controller Service discovery URI: {}", controllerURIDiscover);
-
+        log.info("Controller Service discovery URI: {} direct URI :{}", controllerURIDiscover, controllerURIDirect);
         segmentStoreService = Utils.createPravegaSegmentStoreService(zkUris.get(0), controllerService.getServiceDetails().get(0));
     }
 

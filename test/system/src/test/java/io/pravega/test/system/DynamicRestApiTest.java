@@ -28,17 +28,13 @@ import io.pravega.test.system.framework.SystemTestRunner;
 import io.pravega.test.system.framework.Utils;
 import io.pravega.test.system.framework.services.Service;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.net.URI;
-import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
@@ -128,7 +124,6 @@ public class DynamicRestApiTest extends AbstractSystemTest {
 
         log.info("tls enable status ::{}", Utils.TLS_AND_AUTH_ENABLED);
         if (Utils.TLS_AND_AUTH_ENABLED) {
-
             //webTarget.resolveTemplate("disableCNCheck", "false");
             //webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.key.pem");
             //log.info("web target property {}", webTarget.getConfiguration().getProperties());
@@ -188,37 +183,6 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         assertTrue(responseAsString.contains(String.format("\"streamName\":\"%s\"", stream1)));
         log.info("Response code2 : {}", response.getCookies());
         log.info("Test execution completed successfully.");
-    }
-
-    //@Test
-    public void listScopesAmit() {
-        String trustorePath = "/etc/secret-volume/controller01.key.pem";
-        String password = "/etc/secret-volume/pass-secret-tls";
-        SSLContext sslContext = buildSSLContext(trustorePath, password);
-        log.info("listScopesAmit sslContext::{}", sslContext);
-        log.info("listScopesAmit Protocol::{}", sslContext.getProtocol());
-    }
-
-    private static SSLContext buildSSLContext(String truststorePath, String truststorePassword) {
-        log.info("buildSSLContext truststorePath::{} password ::{}", truststorePath, truststorePassword);
-        try {
-            KeyStore trustStore = KeyStore.getInstance("PKCS12");
-            log.info("buildSSLContext trustStore::{}", trustStore);
-            try (InputStream truststoreInputStream = new FileInputStream(truststorePath)) {
-                trustStore.load(truststoreInputStream, truststorePassword.toCharArray());
-            }
-            // Create a TrustManagerFactory
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore);
-
-            // Create a custom SSLContext with the TrustManagerFactory
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-            return sslContext;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private static SSLContext buildSSLContext() {

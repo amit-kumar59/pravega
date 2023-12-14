@@ -27,6 +27,7 @@ import io.grpc.NameResolver;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.auth.MoreCallCredentials;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
@@ -35,6 +36,7 @@ import io.pravega.controller.stream.api.grpc.v1.Controller.ServerRequest;
 import io.pravega.controller.stream.api.grpc.v1.Controller.ServerResponse;
 import io.pravega.controller.stream.api.grpc.v1.ControllerServiceGrpc;
 import io.pravega.shared.controller.tracing.RPCTracingHelpers;
+import io.pravega.shared.security.auth.DefaultCredentials;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
@@ -189,14 +191,21 @@ class ControllerResolverFactory extends NameResolver.Factory {
                 try {
                     channelBuilder = ((NettyChannelBuilder) ManagedChannelBuilder.forTarget(connectString)).sslContext(sslContextBuilder.build())
                             .negotiationType(NegotiationType.TLS);
+
                     // Trace channel.
                     channelBuilder = channelBuilder.intercept(RPCTracingHelpers.getClientInterceptor());
-                    this.channel = channelBuilder.build();
-
+                    this.channel = channelBuilder
+                            .forTarget(connectString)
+                            .nameResolverFactory(new ControllerResolverFactory(executor))
+                            .defaultLoadBalancingPolicy("round_robin")
+                            //.usePlaintext()
+                            .build();
                 } catch (SSLException e) {
                     throw new CompletionException(e);
                 }
-                this.client = ControllerServiceGrpc.newBlockingStub(this.channel);
+                DefaultCredentials credentials = new DefaultCredentials("1111_aaaa", "admin");
+                this.client = ControllerServiceGrpc.newBlockingStub(this.channel)
+                        .withCallCredentials(MoreCallCredentials.from(new PravegaCredentialsWrapper(credentials)));
                 log.info("Amit todo - end client :{}", client);
                 //TODO-END
                 /* this.client = ControllerServiceGrpc.newBlockingStub(ManagedChannelBuilder
