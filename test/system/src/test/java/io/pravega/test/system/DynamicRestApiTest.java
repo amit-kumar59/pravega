@@ -73,14 +73,16 @@ public class DynamicRestApiTest extends AbstractSystemTest {
     public void setup() {
         org.glassfish.jersey.client.ClientConfig clientConfig = new org.glassfish.jersey.client.ClientConfig();
         clientConfig.register(JacksonJsonProvider.class);
-        //clientConfig.property("sun.net.http.allowRestrictedHeaders", "true");
+        clientConfig.property("sun.net.http.allowRestrictedHeaders", "true");
         if (Utils.AUTH_ENABLED) {
             HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(Utils.PRAVEGA_PROPERTIES.get("pravega.client.auth.username"),
                     Utils.PRAVEGA_PROPERTIES.get("pravega.client.auth.password"));
             clientConfig.register(feature);
         }
 
-        if (Utils.TLS_AND_AUTH_ENABLED) {
+        client = ClientBuilder.newClient(clientConfig);
+
+        /*if (Utils.TLS_AND_AUTH_ENABLED) {
             clientConfig.property("sun.net.http.allowRestrictedHeaders", "false");
             client = ClientBuilder.newBuilder()
                     .hostnameVerifier(new NullHostnameVerifier())
@@ -89,7 +91,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
                     .build();
         } else {
             client = ClientBuilder.newClient(clientConfig);
-        }
+        }*/
     }
 
     /**
@@ -119,14 +121,15 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         // Validate the liveliness of the server through a 'ping' request.
         resourceURl = new StringBuilder(restServerURI).append("/ping").toString();
 
-        log.info("ResourceURI::{}", resourceURl);
+        log.info("ResourceURI:ping:{}", resourceURl);
         webTarget = client.target(resourceURl);
 
         log.info("tls enable status ::{}", Utils.TLS_AND_AUTH_ENABLED);
         if (Utils.TLS_AND_AUTH_ENABLED) {
-            //webTarget.resolveTemplate("disableCNCheck", "false");
+            webTarget.resolveTemplate("disableCNCheck", "false");
             //webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.key.pem");
-            //log.info("web target property {}", webTarget.getConfiguration().getProperties());
+            webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/tls.crt");
+            log.info("web target property {}", webTarget.getConfiguration().getProperties());
         }
 
         builder = webTarget.request();
@@ -167,6 +170,8 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         // Validate that the scope is returned from the request.
         webTarget = client.target(restServerURI).path("v1").path("scopes");
         builder = webTarget.request();
+        log.info("Web target request3::{}", builder.buildGet().toString());
+
         response = builder.get();
         assertEquals("Get scopes failed.", OK.getStatusCode(), response.getStatus());
         responseAsString = response.readEntity(String.class);
@@ -177,6 +182,8 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         // Validate that the stream is returned from the request.
         webTarget = client.target(restServerURI).path("v1").path("scopes").path(scope1).path("streams");
         builder = webTarget.request();
+        log.info("Web target request4::{}", builder.buildGet().toString());
+
         response = builder.get();
         assertEquals("Get streams failed.", OK.getStatusCode(), response.getStatus());
         responseAsString = response.readEntity(String.class);
