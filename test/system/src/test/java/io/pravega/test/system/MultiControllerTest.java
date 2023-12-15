@@ -94,7 +94,7 @@ public class MultiControllerTest extends AbstractSystemTest {
 
         if (Utils.TLS_AND_AUTH_ENABLED) {
             controllerURIDirect.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
-            controllerURIDiscover.set(URI.create("pravegas://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
+            controllerURIDiscover.set(URI.create(TLS + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT));
         } else {
             // use the last two uris
             controllerURIDirect.set(URI.create((TCP) + String.join(",", uris)));
@@ -145,7 +145,7 @@ public class MultiControllerTest extends AbstractSystemTest {
                 () -> controllerService.getServiceDetails().isEmpty(), 1000, 30000);
         if (Utils.TLS_AND_AUTH_ENABLED) {
             controllerURIDirect.set(URI.create("tls://0.0.0.0:9090"));
-            controllerURIDiscover.set(URI.create("pravegas://0.0.0.0:9090"));
+            controllerURIDiscover.set(URI.create("tls://0.0.0.0:9090"));
         } else {
             controllerURIDirect.set(URI.create("tcp://0.0.0.0:9090"));
             controllerURIDiscover.set(URI.create("pravega://0.0.0.0:9090"));

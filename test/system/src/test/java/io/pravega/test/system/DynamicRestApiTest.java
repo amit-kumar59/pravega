@@ -32,7 +32,6 @@ import java.net.URI;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -79,10 +78,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
                     Utils.PRAVEGA_PROPERTIES.get("pravega.client.auth.password"));
             clientConfig.register(feature);
         }
-
-        client = ClientBuilder.newClient(clientConfig);
-
-        /*if (Utils.TLS_AND_AUTH_ENABLED) {
+        if (Utils.TLS_AND_AUTH_ENABLED) {
             clientConfig.property("sun.net.http.allowRestrictedHeaders", "false");
             client = ClientBuilder.newBuilder()
                     .hostnameVerifier(new NullHostnameVerifier())
@@ -91,7 +87,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
                     .build();
         } else {
             client = ClientBuilder.newClient(clientConfig);
-        }*/
+        }
     }
 
     /**
@@ -113,49 +109,26 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         URI controllerRESTUri = controllerURIs.get(1);
         Invocation.Builder builder;
 
-        log.info("controller details controllerGRPCUri :{} controllerRESTUri:{}", controllerGRPCUri, controllerRESTUri);
         String protocol = Utils.TLS_AND_AUTH_ENABLED ? "https://" : "http://";
         restServerURI = protocol + controllerRESTUri.getHost() + ":" + controllerRESTUri.getPort();
         log.info("REST Server URI: {}", restServerURI);
 
         // Validate the liveliness of the server through a 'ping' request.
         resourceURl = new StringBuilder(restServerURI).append("/ping").toString();
-
-        log.info("ResourceURI:ping:{}", resourceURl);
         webTarget = client.target(resourceURl);
-
-        log.info("tls enable status ::{}", Utils.TLS_AND_AUTH_ENABLED);
-        if (Utils.TLS_AND_AUTH_ENABLED) {
-            webTarget.resolveTemplate("disableCNCheck", "false");
-            //webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.key.pem");
-            //webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/tls.crt");
-            webTarget.property("javax.net.ssl.trustStore", "/etc/secret-volume/controller01.pem");
-            log.info("web target property {}", webTarget.getConfiguration().getProperties());
-        }
-
         builder = webTarget.request();
-        log.info("Web target request2::{}", builder.buildGet().toString());
         @Cleanup
         Response response = builder.get();
         assertEquals(String.format("Received unexpected status code: %s in response to 'ping' request.", response.getStatus()),
                 OK.getStatusCode(),
                 response.getStatus());
 
-        log.info("response status ::{}", response);
-        log.info("response status ::{}", response.getStatus());
-
         final String scope1 = RandomStringUtils.randomAlphanumeric(10);
         final String stream1 = RandomStringUtils.randomAlphanumeric(10);
 
         String responseAsString = null;
-        log.info("scope1 :{} status stream1::{}", scope1, stream1);
-        List<String> uris = controllerURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
-        log.info("uris==>:{}", uris);
 
-        URI controllerURI = URI.create(((Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) ? TLS : TCP) + String.join(",", uris));
-        log.info("controllerURI==>:{}", controllerURI);
-        ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
-        log.info("clientConfig==>:{}", clientConfig);
+        ClientConfig clientConfig = Utils.buildClientConfig(controllerGRPCUri);
         // Create a scope.
         @Cleanup
         StreamManager streamManager = StreamManager.create(clientConfig);
@@ -166,31 +139,21 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         boolean isStreamCreated = streamManager.createStream(scope1, stream1, StreamConfiguration.builder().scalingPolicy(ScalingPolicy.fixed(1)).build());
         assertTrue("Failed to create stream", isStreamCreated);
 
-        log.info("isScopeCreated::{} isStreamCreated :{}", isScopeCreated, isStreamCreated);
-
         // Validate that the scope is returned from the request.
         webTarget = client.target(restServerURI).path("v1").path("scopes");
         builder = webTarget.request();
-        log.info("Web target request3::{}", builder.buildGet().toString());
-
         response = builder.get();
         assertEquals("Get scopes failed.", OK.getStatusCode(), response.getStatus());
         responseAsString = response.readEntity(String.class);
         assertTrue(responseAsString.contains(String.format("\"scopeName\":\"%s\"", scope1)));
 
-        log.info("Response details1 : {}", response.getStatus());
-
         // Validate that the stream is returned from the request.
         webTarget = client.target(restServerURI).path("v1").path("scopes").path(scope1).path("streams");
         builder = webTarget.request();
-        log.info("Web target request4::{}", builder.buildGet().toString());
-
         response = builder.get();
         assertEquals("Get streams failed.", OK.getStatusCode(), response.getStatus());
         responseAsString = response.readEntity(String.class);
         assertTrue(responseAsString.contains(String.format("\"streamName\":\"%s\"", stream1)));
-        log.info("Response code2 : {}", response.getCookies());
-        log.info("Test execution completed successfully.");
     }
 
     private static SSLContext buildSSLContext() {
