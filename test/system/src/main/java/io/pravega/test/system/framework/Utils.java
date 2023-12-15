@@ -104,7 +104,6 @@ public class Utils {
     }
 
     public static Service createPravegaControllerService(final URI zkUri, String serviceName) {
-        log.info("Test executor type : {}", EXECUTOR_TYPE);
         switch (EXECUTOR_TYPE) {
             case REMOTE_SEQUENTIAL:
                 return new PravegaControllerService(serviceName, zkUri);
@@ -154,9 +153,7 @@ public class Utils {
         if (TLS_AND_AUTH_ENABLED)  {
             resourceName = PROPERTIES_FILE_WITH_TLS;
         }
-
         log.info("Auth enabled :{} tls and auth enabled :{} resourceName :{}", AUTH_ENABLED, TLS_AND_AUTH_ENABLED, resourceName);
-
         Properties props = new Properties();
         if (System.getProperty(CONFIGS) != null) {
             try {

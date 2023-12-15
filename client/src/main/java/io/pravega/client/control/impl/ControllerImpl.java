@@ -125,7 +125,6 @@ import io.pravega.shared.protocol.netty.PravegaNodeUri;
 import io.pravega.shared.security.auth.AccessOperation;
 import io.pravega.shared.security.auth.Credentials;
 import lombok.AccessLevel;
-import lombok.Data;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
@@ -206,7 +205,6 @@ import static io.pravega.shared.controller.tracing.RPCTracingTags.LIST_COMPLETED
 /**
  * RPC based client implementation of Stream Controller V1 API.
  */
-@Data
 public class ControllerImpl implements Controller {
 
     private static final TagLogger log = new TagLogger(LoggerFactory.getLogger(ControllerImpl.class));
@@ -264,8 +262,6 @@ public class ControllerImpl implements Controller {
                                 .keepAliveTime(DEFAULT_KEEPALIVE_TIME_MINUTES, TimeUnit.MINUTES),
                 config, executor, null);
         log.info("Controller client connecting to server at {}", config.getClientConfig().getControllerURI().getAuthority());
-        log.info("Controller client connecting to clientConfig controller uri : {}", config.getClientConfig().getControllerURI().toString());
-        log.info("Controller client connecting to server scheme : {}", config.getClientConfig().getControllerURI().getScheme());
     }
 
     /**
@@ -368,13 +364,10 @@ public class ControllerImpl implements Controller {
 
     @Override
     public CompletableFuture<Boolean> createScope(final String scopeName) {
-        log.info("--createScope started scopeName::{}", scopeName);
         Exceptions.checkNotClosed(closed.get(), this);
-        log.info("createScope started1");
         final long requestId = requestIdGenerator.get();
-        log.info("createScope requestId:{}", requestId);
         long traceId = LoggerHelpers.traceEnter(log, "createScope", scopeName, requestId);
-        log.info("createScope traceId:{}", traceId);
+
         final CompletableFuture<CreateScopeStatus> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<CreateScopeStatus> callback = new RPCAsyncCallback<>(requestId, "createScope", scopeName);
             new ControllerClientTagger(client, timeoutMillis).withTag(requestId, CREATE_SCOPE, scopeName)
@@ -402,7 +395,7 @@ public class ControllerImpl implements Controller {
             }
         }, this.executor).whenComplete((x, e) -> {
             if (e != null) {
-                log.warn(requestId, "createScope amit {} failed: ", scopeName, e);
+                log.warn(requestId, "createScope {} failed: ", scopeName, e);
             }
             LoggerHelpers.traceLeave(log, "createScope", traceId, scopeName, requestId);
         });
@@ -1116,24 +1109,19 @@ public class ControllerImpl implements Controller {
 
     @Override
     public CompletableFuture<Map<Segment, Long>> getSegmentsAtTime(final Stream stream, final long timestamp) {
-        log.info("getSegmentsAtTime stream::{} timestamp :{}", stream, timestamp);
         Exceptions.checkNotClosed(closed.get(), this);
         Preconditions.checkNotNull(stream, "stream");
         long traceId = LoggerHelpers.traceEnter(log, "getSegmentsAtTime", stream, timestamp);
         final long requestId = requestIdGenerator.get();
 
-        log.info("getSegmentsAtTime traceId :{} requestId :{}", traceId, requestId);
         final CompletableFuture<SegmentsAtTime> result = this.retryConfig.runAsync(() -> {
             RPCAsyncCallback<SegmentsAtTime> callback = new RPCAsyncCallback<>(traceId, "getSegmentsAtTime", 
                     stream, timestamp);
             StreamInfo streamInfo = ModelHelper.createStreamInfo(stream.getScope(), stream.getStreamName(), AccessOperation.NONE);
-            log.info("getSegmentsAtTime streamInfo :{}", streamInfo);
             GetSegmentsRequest request = GetSegmentsRequest.newBuilder()
                     .setStreamInfo(streamInfo)
                     .setTimestamp(timestamp)
                     .build();
-            log.info("getSegmentsAtTime request ::{}", request);
-
             client.withDeadlineAfter(timeoutMillis, TimeUnit.MILLISECONDS).getSegments(request, callback);
             new ControllerClientTagger(client, timeoutMillis).withTag(requestId, GET_SEGMENTS, 
                     streamInfo.getScope(), streamInfo.getStream()).getSegments(request, callback);

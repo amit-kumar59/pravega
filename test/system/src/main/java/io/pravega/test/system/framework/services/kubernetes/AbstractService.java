@@ -108,12 +108,6 @@ public abstract class AbstractService implements Service {
             log.info("Skipping PravegaCluster installation.");
             return CompletableFuture.completedFuture(null);
         }
-
-        log.info("Pravega property");
-        props.forEach((key, value) -> {
-            log.info("Key:{} Values :{}", key, value);
-        });
-
         return k8sClient.createSecret(NAMESPACE, authSecret())
                 .thenCompose(v -> k8sClient.createAndUpdateCustomObject(CUSTOM_RESOURCE_GROUP_PRAVEGA, CUSTOM_RESOURCE_VERSION_PRAVEGA,
                 NAMESPACE, CUSTOM_RESOURCE_PLURAL_PRAVEGA,
@@ -190,14 +184,14 @@ public abstract class AbstractService implements Service {
                 .put("pravega", pravegaSpec);
         builder.put("version", PRAVEGA_VERSION);
 
-        log.info("Tls and auth enabled :{} auth enabled :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED);
+        log.debug("Tls and auth enabled :{} auth enabled :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED);
         if (Utils.TLS_AND_AUTH_ENABLED) {
             builder.put("tls", tlsSpec);
         }
         if (Utils.AUTH_ENABLED) {
             builder.put("authentication", authGenericSpec);
         }
-        log.info("Pravega specs :{}", builder.build());
+        log.debug("Pravega specs :{}", builder.build());
         return builder.build();
     }
 

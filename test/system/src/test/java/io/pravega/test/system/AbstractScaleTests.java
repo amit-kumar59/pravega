@@ -29,7 +29,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 abstract class AbstractScaleTests extends AbstractReadWriteTest {
+
     final static String SCOPE = "testAutoScale" + RandomFactory.create().nextInt(Integer.MAX_VALUE);
     private static final int CONTROLLER_GRPC_PORT = 9090;
     @Getter
@@ -51,7 +51,6 @@ abstract class AbstractScaleTests extends AbstractReadWriteTest {
 
     public AbstractScaleTests() {
         controllerURI = createControllerURI();
-        log.info("Controller uri:{}", controllerURI);
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
         connectionFactory = new SocketConnectionFactoryImpl(clientConfig);
         controller = createController(clientConfig);

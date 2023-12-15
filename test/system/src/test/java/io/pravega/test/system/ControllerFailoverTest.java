@@ -60,6 +60,7 @@ public class ControllerFailoverTest extends AbstractSystemTest {
     private static final int CONTROLLER_GRPC_PORT = 9090;
     @Rule
     public Timeout globalTimeout = Timeout.seconds(3 * 60);
+
     private final ScheduledExecutorService executorService = ExecutorServiceHelpers.newScheduledThreadPool(5, "test");
     private Service controllerService = null;
     private Service segmentStoreService = null;
@@ -96,7 +97,6 @@ public class ControllerFailoverTest extends AbstractSystemTest {
         } else {
             controllerURIDirect = URI.create(TCP + String.join(",", uris));
         }
-        //controllerURIDirect = URI.create((Utils.TLS_AND_AUTH_ENABLED ? TLS : TCP) + String.join(",", uris));
         log.info("Controller Service direct URI: {}", controllerURIDirect);
 
         segmentStoreService = Utils.createPravegaSegmentStoreService(zkUris.get(0), controllerUris.get(0));
