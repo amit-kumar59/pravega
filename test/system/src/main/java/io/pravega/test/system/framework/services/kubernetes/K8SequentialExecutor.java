@@ -72,13 +72,11 @@ public class K8SequentialExecutor implements TestExecutor {
         log.info("Start execution of test {}#{} on the KUBERNETES Cluster", className, methodName);
 
         final K8sClient client = ClientFactory.INSTANCE.getK8sClient();
-        log.info("client details:{}", client);
 
         Map<String, V1ContainerStatus> podStatusBeforeTest = getPravegaPodStatus(client);
 
         final V1Pod pod = getTestPod(className, methodName, podName.toLowerCase(), client);
-        log.info("pod details:{}", pod);
-
+        log.debug("Pod details {}", pod);
         final AtomicReference<CompletableFuture<Void>> logDownload = new AtomicReference<>(CompletableFuture.completedFuture(null));
         return client.createServiceAccount(NAMESPACE, getServiceAccount()) // create service Account, ignore if already present.
                 .thenCompose(v -> client.createClusterRoleBinding(getClusterRoleBinding())) // ensure test pod has cluster admin rights.
@@ -152,26 +150,20 @@ public class K8SequentialExecutor implements TestExecutor {
                 .volumeMounts(ImmutableList.of(new V1VolumeMount().mountPath("/data").name("task-pv-storage")))
                 ))
                 .restartPolicy("Never"));
-        if (Utils.TLS_AND_AUTH_ENABLED && Utils.AUTH_ENABLED) {
-
+        if (Utils.TLS_AND_AUTH_ENABLED) {
             List<URI> ips = Futures.getAndHandleExceptions(client.getStatusOfPodWithLabel(NAMESPACE, "component", "pravega-controller")
                             .thenApply(statuses -> statuses.stream()
                                     .flatMap(s -> Stream.of(URI.create(s.getPodIP())))
                                     .collect(Collectors.toList())),
                     t -> new TestFrameworkException(RequestFailed, "Failed to fetch ServiceDetails for pravega-controller", t));
             log.debug("Ips list :{}", ips);
-
             List<V1Volume> volumes = new ArrayList<>(pod.getSpec().getVolumes());
             volumes.add(new V1Volume().name("tls-cert").secret(new V1SecretVolumeSource().defaultMode(420).secretName(Utils.TLS_SECRET_NAME)));
             pod.getSpec().setVolumes(volumes);
-
-            log.info("Volume spec ::{} ", pod.getSpec().getVolumes());
-            log.info("Alliase list  ::{} ", pod.getSpec().getHostAliases());
-
+            log.debug("Volume spec :{} Alias list :{}", pod.getSpec().getVolumes(), pod.getSpec().getHostAliases());
             List<V1VolumeMount> volumeMounts = new ArrayList<>(pod.getSpec().getContainers().get(0).getVolumeMounts());
             volumeMounts.add(new V1VolumeMount().mountPath(Utils.TLS_MOUNT_PATH).name("tls-cert"));
             pod.getSpec().getContainers().get(0).setVolumeMounts(volumeMounts);
-            log.info("Pod details :{} valume mounts :{}", pod, pod.getSpec().getContainers().get(0).getVolumeMounts());
         }
         return pod;
     }

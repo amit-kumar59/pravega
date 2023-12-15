@@ -107,7 +107,6 @@ public class ReadTxnWriteScaleWithFailoverTest extends AbstractFailoverTests {
         } else {
             controllerURIDirect = URI.create(TCP + String.join(",", uris));
         }
-
         log.info("Controller Service direct URI: {}", controllerURIDirect);
 
         // Verify segment store is running.

@@ -68,7 +68,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static io.pravega.shared.NameUtils.computeSegmentId;
 import static org.junit.Assert.assertTrue;
@@ -454,25 +453,16 @@ public class SegmentReaderAPITest extends AbstractReadWriteTest {
         assertEquals(150L, streamCut3.asImpl().getPositions().get(segment3).longValue());
     }
 
-    private void writeEvents(int numberOfEvents, EventStreamWriter<String> writer) {
-        Supplier<String> routingKeyGenerator = () -> String.valueOf(random.nextInt());
-        IntStream.range(0, numberOfEvents).forEach(v -> writer.writeEvent(routingKeyGenerator.get(), DATA_OF_SIZE_30).join());
-    }
-
     void writeEvents(EventStreamClientFactory clientFactory, String streamName, int totalEvents) {
-        writeEvents(clientFactory, streamName, totalEvents, 0);
-    }
-
-    void writeEvents(EventStreamClientFactory clientFactory, String streamName, int totalEvents, int initialPoint) {
         @Cleanup
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName, new UTF8StringSerializer(),
                 EventWriterConfig.builder().build());
         Supplier<String> routingKeyGenerator = () -> String.valueOf(random.nextInt());
-        for (int i = initialPoint; i < totalEvents + initialPoint; i++) {
+        for (int i = 0; i < totalEvents; i++) {
             writer.writeEvent(routingKeyGenerator.get(), DATA_OF_SIZE_30).join();
             log.info("Writing event: {} to stream {}.", streamName + i, streamName);
         }
-        log.info("Writer {} finished writing {} events.", writer, totalEvents - initialPoint);
+        log.info("Writer {} finished writing {} events.", writer, totalEvents);
     }
 
     private static ReaderGroupConfig getReaderGroupConfig(StreamCut startStreamCut, StreamCut endStreamCut, Stream stream) {

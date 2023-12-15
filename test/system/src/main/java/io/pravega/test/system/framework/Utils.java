@@ -153,7 +153,7 @@ public class Utils {
         if (TLS_AND_AUTH_ENABLED)  {
             resourceName = PROPERTIES_FILE_WITH_TLS;
         }
-        log.info("Auth enabled :{} tls and auth enabled :{} resourceName :{}", AUTH_ENABLED, TLS_AND_AUTH_ENABLED, resourceName);
+        log.debug("Auth enabled :{} tls and auth enabled :{} resourceName :{}", AUTH_ENABLED, TLS_AND_AUTH_ENABLED, resourceName);
         Properties props = new Properties();
         if (System.getProperty(CONFIGS) != null) {
             try {
@@ -173,7 +173,7 @@ public class Utils {
     }
 
     public static ClientConfig buildClientConfig(URI controllerUri) {
-        log.info("Default trust store path :{} and validate hostname :{} auth enabled :{}, tls and auth enabled :{} controllerUri :{}",
+        log.debug("Default trust store path :{} and validate hostname :{} auth enabled :{}, tls and auth enabled :{} controllerUri :{}",
                 DEFAULT_TRUSTSTORE_PATH, VALIDATE_HOSTNAME, AUTH_ENABLED, TLS_AND_AUTH_ENABLED, controllerUri);
         if (TLS_AND_AUTH_ENABLED) {
             log.debug("Generating config with tls and auth enabled.");

@@ -84,21 +84,17 @@ public class PravegaControllerK8sService extends AbstractService {
     public List<URI> getServiceDetails() {
         //fetch the URI.
         String prefix = Utils.TLS_AND_AUTH_ENABLED ? TLS : TCP;
-        log.info("uri prefix : {}", prefix);
         String tlsCname = Utils.getConfig("tlsCertCNName", "pravega-pravega-controller");
-        log.info("Tls enabled status :{} auth enabled status :{} tls cname :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED, tlsCname);
+        log.debug("Tls enabled status :{} auth enabled status :{} tls cname :{}", Utils.TLS_AND_AUTH_ENABLED, Utils.AUTH_ENABLED, tlsCname);
         List<V1PodStatus> viPodsList = k8sClient.getStatusOfPodWithLabel(NAMESPACE, "component", PRAVEGA_CONTROLLER_LABEL).join();
-        log.info("Pods list size:: {} and pods  list details :: {}", viPodsList.size(), viPodsList);
+        log.info("Pods list size {} and pods list details {}", viPodsList.size(), viPodsList);
 
         List<URI> uriList = Futures.getAndHandleExceptions(k8sClient.getStatusOfPodWithLabel(NAMESPACE, "component", PRAVEGA_CONTROLLER_LABEL)
                        .thenApply(statuses -> statuses.stream()
-
                   .flatMap(s -> Stream.of(URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED) ? tlsCname : s.getPodIP()) + ":" + CONTROLLER_GRPC_PORT),
                                           URI.create(prefix + ((Utils.TLS_AND_AUTH_ENABLED) ? tlsCname : s.getPodIP()) + ":" + CONTROLLER_REST_PORT)))
                      .collect(Collectors.toList())),
                                               t -> new TestFrameworkException(RequestFailed, "Failed to fetch ServiceDetails for pravega-controller", t));
-
-        log.info("uriList before return ::{}", uriList);
         return uriList;
     }
 
@@ -109,10 +105,7 @@ public class PravegaControllerK8sService extends AbstractService {
         return k8sClient.getCustomObject(CUSTOM_RESOURCE_GROUP_PRAVEGA, CUSTOM_RESOURCE_VERSION_PRAVEGA, NAMESPACE, CUSTOM_RESOURCE_PLURAL_PRAVEGA, PRAVEGA_ID)
                         .thenCompose(o -> {
                            Map<String, Object> spec = (Map<String, Object>) (((Map<String, Object>) o).get("spec"));
-                           log.info("sepc spec :{}", spec);
-
                            Map<String, Object> pravegaSpec = (Map<String, Object>) spec.get("pravega");
-                            log.info("Pravega spec :{}", pravegaSpec);
 
                            int currentControllerCount = ((Double) pravegaSpec.get("controllerReplicas")).intValue();
                            int currentSegmentStoreCount = ((Double) pravegaSpec.get("segmentStoreReplicas")).intValue();
@@ -120,7 +113,6 @@ public class PravegaControllerK8sService extends AbstractService {
                                      currentControllerCount, currentSegmentStoreCount);
                            if (currentControllerCount != newInstanceCount) {
                                final Map<String, Object> patchedSpec = buildPatchedPravegaClusterSpec("controllerReplicas", newInstanceCount, "pravega");
-                               log.info("patchedSpec spec :{}", patchedSpec);
 
                                return k8sClient.createAndUpdateCustomObject(CUSTOM_RESOURCE_GROUP_PRAVEGA, CUSTOM_RESOURCE_VERSION_PRAVEGA, NAMESPACE, CUSTOM_RESOURCE_PLURAL_PRAVEGA, patchedSpec)
                                        .thenCompose(v -> k8sClient.waitUntilPodIsRunning(NAMESPACE, "component", PRAVEGA_CONTROLLER_LABEL, newInstanceCount));

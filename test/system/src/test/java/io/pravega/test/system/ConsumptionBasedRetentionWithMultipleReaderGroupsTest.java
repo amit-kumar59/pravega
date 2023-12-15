@@ -734,7 +734,7 @@ public class ConsumptionBasedRetentionWithMultipleReaderGroupsTest extends Abstr
             } else {
                 controllerURI = URI.create(TCP + String.join(",", uris));
             }
-            log.info("controllerURI 12 :{}", controllerURI);
+            log.debug("controllerURI {}", controllerURI);
             clientConfig = Utils.buildClientConfig(controllerURI);
             controller = new ControllerImpl(ControllerImplConfig.builder()
                     .clientConfig(clientConfig)

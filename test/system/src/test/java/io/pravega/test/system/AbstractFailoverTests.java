@@ -175,27 +175,17 @@ abstract class AbstractFailoverTests extends AbstractReadWriteTest {
 
     void waitForScaling(String scope, String stream, StreamConfiguration initialConfig) {
         int initialMaxSegmentNumber = initialConfig.getScalingPolicy().getMinNumSegments() - 1;
-        log.info("waitFor scaling initial max seg number :{} SCALE_WAIT_ITERATIONS :{}", initialMaxSegmentNumber, SCALE_WAIT_ITERATIONS);
         boolean scaled = false;
         for (int waitCounter = 0; waitCounter < SCALE_WAIT_ITERATIONS; waitCounter++) {
             StreamSegments streamSegments = controller.getCurrentSegments(scope, stream).join();
-            log.info("waitFor scaling streamSegments : {} ", streamSegments);
-            long segmentCount = streamSegments.getSegments().stream().mapToLong(Segment::getSegmentId).max().orElse(-1);
-
-            log.info("segmentCount ::{} waitCounter :{} initialMaxSegmentNumber ::{} condition status :{}", segmentCount, waitCounter, initialMaxSegmentNumber,
-                    segmentCount > initialMaxSegmentNumber);
-            if (segmentCount > initialMaxSegmentNumber) {
-                log.info("inside if scaled ::{}", scaled);
+            if (streamSegments.getSegments().stream().mapToLong(Segment::getSegmentId).max().orElse(-1) > initialMaxSegmentNumber) {
                 scaled = true;
-                log.info("inside if after scaled ::{}", scaled);
                 break;
             }
-            log.info("*****after if****");
             //Scaling operation did not happen, wait
             Exceptions.handleInterrupted(() -> Thread.sleep(10000));
         }
-        log.info("****after for loop scaled::{}***", scaled);
+
         assertTrue("Scaling did not happen within desired time", scaled);
-        log.info("waitForScaling completed.");
     }
 }
