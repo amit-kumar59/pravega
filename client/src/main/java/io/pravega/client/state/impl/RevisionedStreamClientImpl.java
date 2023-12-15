@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.concurrent.GuardedBy;
@@ -274,15 +273,6 @@ public class RevisionedStreamClientImpl<T> implements RevisionedStreamClient<T> 
     @Override
     public Revision fetchOldestRevision() {
         long startingOffset = Futures.getThrowingException(meta.getSegmentInfo()).getStartingOffset();
-        try {
-            SegmentInfo segmentInfo = meta.getSegmentInfo().get();
-            log.info("segmentinfo::{} starting offset :{}", segmentInfo, segmentInfo.getStartingOffset());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-        log.info("starting offset ::{}", startingOffset);
         return new RevisionImpl(segment, startingOffset, 0);
     }
 

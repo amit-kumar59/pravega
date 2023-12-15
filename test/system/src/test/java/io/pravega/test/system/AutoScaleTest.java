@@ -138,7 +138,6 @@ public class AutoScaleTest extends AbstractScaleTests {
                     recordResult(scalewithTxn, "ScaleWithTxn");
 
                 }), RuntimeException::new);
-        log.info("Scale tests has completed successfully!!");
     }
 
     /**
@@ -151,11 +150,7 @@ public class AutoScaleTest extends AbstractScaleTests {
      */
     private CompletableFuture<Void> scaleUpTest() {
         ClientFactoryImpl clientFactory = getClientFactory();
-        log.info("scaleUpTest clientFactory ::{}", clientFactory);
-
         ControllerImpl controller = getController();
-        log.info("scaleUpTest controller ::{}", controller);
-
         final AtomicBoolean exit = new AtomicBoolean(false);
         createWriters(clientFactory, 6, SCOPE, SCALE_UP_STREAM_NAME);
 
@@ -165,7 +160,6 @@ public class AutoScaleTest extends AbstractScaleTests {
                 .throwingOn(RuntimeException.class)
                 .runAsync(() -> controller.getCurrentSegments(SCOPE, SCALE_UP_STREAM_NAME)
                         .thenAccept(x -> {
-                            log.info("get current segment info :{}", x);
                             log.debug("size ==" + x.getSegments().size());
                             if (x.getSegments().size() == 1) {
                                 throw new ScaleOperationNotDoneException();

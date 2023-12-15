@@ -116,12 +116,7 @@ public class ControllerService {
         if (cluster == null) {
             return Futures.failedFuture(new IllegalStateException("Controller cluster not initialized"));
         }
-        log.info("************ ControllerService@getControllerServerList amit  start******************* ");
-        cluster.getClusterMembers().stream().forEach((host) -> {
-            log.info("ip address ::Host", host.toString());
-            log.info("ip address ::{} port :{} host id::{} endPoint ID ::{}", host.getIpAddr(), host.getPort(), host.getHostId(), host.getEndpointId());
-        });
-        log.info("************ ControllerService@getControllerServerList amit  end******************* ");
+
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return cluster.getClusterMembers().stream()
@@ -129,7 +124,6 @@ public class ControllerService {
                         .collect(Collectors.toList());
             } catch (ClusterException e) {
                 // cluster implementation throws checked exceptions which cannot be thrown inside completable futures.
-                log.error("Throwing Cluster Exception amit ::{}", e);
                 throw Exceptions.sneakyThrow(e);
             }
         }, executor);
