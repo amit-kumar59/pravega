@@ -241,7 +241,8 @@ public class ControllerServiceStarter extends AbstractIdleService implements Aut
                 healthServiceManager.register(segmentContainerMonitorHC);
             }
 
-            String hostString = grpcServerConfig.isTlsEnabled() ? "pravega-pravega-controller" : "localhost";
+            String hostString = grpcServerConfig.isTlsEnabled() ? "pravega-pravega-controller:" : "localhost:";
+            log.info("Host string :{}", hostString);
             // This client config is used by the segment store helper (SegmentHelper) to connect to the segment store.
             ClientConfig.ClientConfigBuilder clientConfigBuilder = ClientConfig.builder()
                     .controllerURI(URI.create((grpcServerConfig.isTlsEnabled() ?
