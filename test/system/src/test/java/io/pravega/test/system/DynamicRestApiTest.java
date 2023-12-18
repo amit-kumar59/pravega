@@ -80,11 +80,11 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         }
         if (Utils.TLS_AND_AUTH_ENABLED) {
             clientConfig.property("sun.net.http.allowRestrictedHeaders", "false");
-            client = ClientBuilder.newBuilder()
+            /*client = ClientBuilder.newBuilder()
                     .hostnameVerifier(new NullHostnameVerifier())
                     .sslContext(buildSSLContext())
                     .withConfig(clientConfig)
-                    .build();
+                    .build();*/
         } else {
             client = ClientBuilder.newClient(clientConfig);
         }
