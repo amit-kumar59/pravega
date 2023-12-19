@@ -147,6 +147,10 @@ public class ByteClientTest extends AbstractSystemTest {
     public void byteClientTest() throws IOException {
         log.info("byteClientTest:: with security enabled: {}", Utils.AUTH_ENABLED);
         log.info("Invoking byteClientTest test with Controller URI: {}", controllerURI);
+        String tlsCertCNName = Utils.getTlsCertificateCommonName();
+
+        log.info("***********tlsCertificate Cn name********** :: {}", tlsCertCNName);
+
         @Cleanup
         ByteStreamClientFactory byteStreamClient = createClientFactory(SCOPE);
         @Cleanup("closeAndSeal")
