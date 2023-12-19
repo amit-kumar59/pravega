@@ -242,7 +242,7 @@ public class Utils {
         return config.trim().equalsIgnoreCase("true") ? true : false;
     }
 
-    public static String getTlsCertificateCommonName() {
-               return getConfig("tlsCertCNName", "pravega-pravega-controller");
+    public static String getTlsCommonName() {
+               return Utils.getConfig("tlsCertCNName", "pravega-pravega-controller");
     }
 }
