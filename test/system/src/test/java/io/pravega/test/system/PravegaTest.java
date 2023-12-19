@@ -85,10 +85,6 @@ public class PravegaTest extends AbstractReadWriteTest {
      */
     @Test
     public void simpleTest() {
-
-        String tlsCertCNName = Utils.getTlsCommonName();
-        log.info("from simpleTest tlsCertificate Cn name :: {}", tlsCertCNName);
-
         Service conService = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = conService.getServiceDetails();
         URI controllerUri = ctlURIs.get(0);

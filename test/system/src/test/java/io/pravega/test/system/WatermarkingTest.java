@@ -106,6 +106,8 @@ public class WatermarkingTest extends AbstractSystemTest {
      */
     @Environment
     public static void initialize() throws MarathonException, ExecutionException {
+        String tlsCertCNName = Utils.getTlsCommonName();
+        log.info("from watermarkingTests initialize tlsCertificate Cn name :: {}", tlsCertCNName);
         URI zkUri = startZookeeperInstance();
         startBookkeeperInstances(zkUri);
         URI controllerUri = startPravegaControllerInstances(zkUri, 2);
@@ -114,6 +116,8 @@ public class WatermarkingTest extends AbstractSystemTest {
 
     @Before
     public void setup() {
+        String tlsCertCNName = Utils.getTlsCommonName();
+        log.info("from watermarkingTests setup tlsCertificate Cn name :: {}", tlsCertCNName);
         controllerInstance = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = controllerInstance.getServiceDetails();
         final List<String> uris = ctlURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
@@ -138,6 +142,8 @@ public class WatermarkingTest extends AbstractSystemTest {
     @Test
     public void watermarkingTests() throws Exception {
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
+        String tlsCertCNName = Utils.getTlsCommonName();
+        log.info("from watermarkingTests tlsCertificate Cn name :: {}", tlsCertCNName);
         @Cleanup
         ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(clientConfig);
         ControllerImpl controller = new ControllerImpl(ControllerImplConfig.builder().clientConfig(clientConfig).build(),
