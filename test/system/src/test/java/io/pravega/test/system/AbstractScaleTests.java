@@ -28,7 +28,6 @@ import io.pravega.test.system.framework.services.Service;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 abstract class AbstractScaleTests extends AbstractReadWriteTest {
 
     final static String SCOPE = "testAutoScale" + RandomFactory.create().nextInt(Integer.MAX_VALUE);
-    private static final int CONTROLLER_GRPC_PORT = 9090;
     @Getter
     private final URI controllerURI;
     @Getter
@@ -67,12 +65,7 @@ abstract class AbstractScaleTests extends AbstractReadWriteTest {
     private URI createControllerURI() {
         Service conService = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = conService.getServiceDetails();
-        final List<String> uris = ctlURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
-        if (Utils.TLS_AND_AUTH_ENABLED) {
-            return URI.create("tls://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT);
-        } else {
-            return URI.create("tcp://" + String.join(",", uris));
-        }
+        return ctlURIs.get(0);
     }
 
     void recordResult(final CompletableFuture<Void> scaleTestResult, final String testName) {

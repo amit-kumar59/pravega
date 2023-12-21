@@ -87,7 +87,6 @@ public class WatermarkingTest extends AbstractSystemTest {
 
     private static final String STREAM = "testWatermarkingStream";
     private static final String SCOPE = "testWatermarkingScope" + RandomFactory.create().nextInt(Integer.MAX_VALUE);
-    private static final int CONTROLLER_GRPC_PORT = 9090;
 
     @Rule
     public Timeout globalTimeout = Timeout.seconds(10 * 60);
@@ -106,8 +105,6 @@ public class WatermarkingTest extends AbstractSystemTest {
      */
     @Environment
     public static void initialize() throws MarathonException, ExecutionException {
-        String tlsCertCNName = Utils.getTlsCommonName();
-        log.info("from watermarkingTests initialize tlsCertificate Cn name :: {}", tlsCertCNName);
         URI zkUri = startZookeeperInstance();
         startBookkeeperInstances(zkUri);
         URI controllerUri = startPravegaControllerInstances(zkUri, 2);
@@ -116,17 +113,11 @@ public class WatermarkingTest extends AbstractSystemTest {
 
     @Before
     public void setup() {
-        String tlsCertCNName = Utils.getTlsCommonName();
-        log.info("from watermarkingTests setup tlsCertificate Cn name :: {}", tlsCertCNName);
         controllerInstance = Utils.createPravegaControllerService(null);
         List<URI> ctlURIs = controllerInstance.getServiceDetails();
         final List<String> uris = ctlURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
 
-        if (Utils.TLS_AND_AUTH_ENABLED) {
-            controllerURI = URI.create("tls://" + Utils.getConfig("tlsCertCNName", "pravega-pravega-controller") + ":" + CONTROLLER_GRPC_PORT);
-        } else {
-            controllerURI = URI.create("tcp://" + String.join(",", uris));
-        }
+        controllerURI = Utils.getControllerURI(uris);
         log.info("setup controller uri :{}", controllerURI);
         streamManager = StreamManager.create(Utils.buildClientConfig(controllerURI));
         assertTrue("Creating Scope", streamManager.createScope(SCOPE));

@@ -72,7 +72,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
     public void setup() {
         org.glassfish.jersey.client.ClientConfig clientConfig = new org.glassfish.jersey.client.ClientConfig();
         clientConfig.register(JacksonJsonProvider.class);
-        //clientConfig.property("sun.net.http.allowRestrictedHeaders", "true");
+        clientConfig.property("sun.net.http.allowRestrictedHeaders", "true");
         if (Utils.AUTH_ENABLED) {
             HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(Utils.PRAVEGA_PROPERTIES.get("pravega.client.auth.username"),
                     Utils.PRAVEGA_PROPERTIES.get("pravega.client.auth.password"));
@@ -80,13 +80,14 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         }
         if (Utils.TLS_AND_AUTH_ENABLED) {
             clientConfig.property("sun.net.http.allowRestrictedHeaders", "false");
-            /*client = ClientBuilder.newBuilder()
+            client = ClientBuilder.newBuilder()
                     .hostnameVerifier(new NullHostnameVerifier())
                     .sslContext(buildSSLContext())
                     .withConfig(clientConfig)
-                    .build();*/
+                    .build();
+        } else {
+            client = ClientBuilder.newClient(clientConfig);
         }
-        client = ClientBuilder.newClient(clientConfig);
     }
 
     /**
@@ -167,6 +168,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         return null;
     }
 
+    //TODO Need to checks the server is trusted with the truststore configured correctly.
     /**
      * Host name verifier that does not perform nay checks.
      */
@@ -176,6 +178,7 @@ public class DynamicRestApiTest extends AbstractSystemTest {
         }
     }
 
+    //TODO Need to checks the server is trusted with the truststore configured correctly.
     /**
      * Trust manager that does not perform nay checks.
      */
