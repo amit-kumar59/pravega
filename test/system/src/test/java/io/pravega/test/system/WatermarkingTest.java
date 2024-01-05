@@ -72,7 +72,11 @@ import java.util.stream.Collectors;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import mesosphere.marathon.client.MarathonException;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.Assume;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
@@ -129,6 +133,12 @@ public class WatermarkingTest extends AbstractSystemTest {
 
     @Test
     public void watermarkingTests() throws Exception {
+        /*
+         Its required code changes in server side (ControllerServiceStarter.java) to run this system test with TLS enabled.
+         Skipping test execution when TLS is enabled as of now.
+        */
+        Assume.assumeTrue(!Utils.TLS_AND_AUTH_ENABLED);
+        log.info("tls and auth enable status ::{}", Utils.TLS_AND_AUTH_ENABLED);
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
         @Cleanup
         ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(clientConfig);
@@ -166,7 +176,6 @@ public class WatermarkingTest extends AbstractSystemTest {
                 new WatermarkSerializer(),
                 SynchronizerConfig.builder().build());
 
-        Assume.assumeTrue(!Utils.TLS_AND_AUTH_ENABLED);
         LinkedBlockingQueue<Watermark> watermarks = new LinkedBlockingQueue<>();
         fetchWatermarks(watermarkReader, watermarks, stopFlag);
 
