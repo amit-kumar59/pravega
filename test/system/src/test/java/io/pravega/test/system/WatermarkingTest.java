@@ -72,10 +72,7 @@ import java.util.stream.Collectors;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import mesosphere.marathon.client.MarathonException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
@@ -117,7 +114,8 @@ public class WatermarkingTest extends AbstractSystemTest {
         List<URI> ctlURIs = controllerInstance.getServiceDetails();
         final List<String> uris = ctlURIs.stream().filter(ISGRPC).map(URI::getAuthority).collect(Collectors.toList());
 
-        controllerURI = URI.create("tcp://" + String.join(",", uris));
+        controllerURI = Utils.getControllerURI(uris);
+        log.info("Controller URI ::{}", controllerURI);
         streamManager = StreamManager.create(Utils.buildClientConfig(controllerURI));
         assertTrue("Creating Scope", streamManager.createScope(SCOPE));
         assertTrue("Creating stream", streamManager.createStream(SCOPE, STREAM, config));
@@ -131,22 +129,7 @@ public class WatermarkingTest extends AbstractSystemTest {
 
     @Test
     public void watermarkingTests() throws Exception {
-        /*
-         Its required code changes in server side (ControllerServiceStarter.java) to run this system test with TLS enabled.
-         Skipping test execution when TLS is enabled as of now.
-        */
-        log.info("Utils.TLS_AND_AUTH_ENABLED ::{}", Utils.TLS_AND_AUTH_ENABLED);
-        log.info("!Utils.TLS_AND_AUTH_ENABLED ::{}", !Utils.TLS_AND_AUTH_ENABLED);
-        if (!Utils.TLS_AND_AUTH_ENABLED) {
-            watermarkingTests(controllerURI);
-        }
-        log.info("End of the watermarking test!!");
-    }
-
-    public void watermarkingTests(URI controllerURI) throws Exception {
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
-        String tlsCertCNName = Utils.getTlsCommonName();
-        log.info("from watermarkingTests tlsCertificate Cn name :: {}", tlsCertCNName);
         @Cleanup
         ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(clientConfig);
         ControllerImpl controller = new ControllerImpl(ControllerImplConfig.builder().clientConfig(clientConfig).build(),
@@ -183,6 +166,7 @@ public class WatermarkingTest extends AbstractSystemTest {
                 new WatermarkSerializer(),
                 SynchronizerConfig.builder().build());
 
+        Assume.assumeTrue(!Utils.TLS_AND_AUTH_ENABLED);
         LinkedBlockingQueue<Watermark> watermarks = new LinkedBlockingQueue<>();
         fetchWatermarks(watermarkReader, watermarks, stopFlag);
 
