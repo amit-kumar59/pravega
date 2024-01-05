@@ -137,8 +137,9 @@ public class WatermarkingTest extends AbstractSystemTest {
          Its required code changes in server side (ControllerServiceStarter.java) to run this system test with TLS enabled.
          Skipping test execution when TLS is enabled as of now.
         */
-        Assume.assumeTrue(!Utils.TLS_AND_AUTH_ENABLED);
-        log.info("tls and auth enable status ::{}", Utils.TLS_AND_AUTH_ENABLED);
+        if (Utils.TLS_AND_AUTH_ENABLED) {
+            return;
+        }
         final ClientConfig clientConfig = Utils.buildClientConfig(controllerURI);
         @Cleanup
         ConnectionFactory connectionFactory = new SocketConnectionFactoryImpl(clientConfig);
